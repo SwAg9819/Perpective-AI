@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Perspective — Clinical Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+/* ── Apple Design Language: The Foundation ────────────────────────── */
+:root {
+  --sf-bg: #F5F5F7;
+  --sf-card: rgba(255, 255, 255, 0.8);
+  --sf-text: #1D1D1F;
+  --sf-text-sec: #86868B;
+  --sf-accent: #007AFF;
+  --sf-danger: #FF3B30;
+  --sf-success: #34C759;
+  --sf-border: rgba(0, 0, 0, 0.08);
+  --blur: saturate(180%) blur(20px);
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+  --radius: 18px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--sf-bg);
+  color: var(--sf-text);
+  line-height: 1.5;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Layout ─────────────────────────────────────────────────────────── */
+.app { display: flex; height: 100vh; }
+
+.sidebar {
+  width: 260px;
+  background: rgba(245, 245, 247, 0.6);
+  backdrop-filter: var(--blur);
+  border-right: 1px solid var(--sf-border);
+  display: flex;
+  flex-direction: column;
+  padding: 40px 20px;
+  z-index: 100;
+}
+
+.brand { text-align: center; margin-bottom: 40px; }
+.brand-name { font-size: 24px; font-weight: 700; letter-spacing: -0.8px; }
+.brand-tag { font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--sf-text-sec); margin-top: 4px; letter-spacing: 1px; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-radius: 12px;
+  color: var(--sf-text); text-decoration: none;
+  font-size: 14px; font-weight: 500; border: none;
+  background: transparent; width: 100%; cursor: pointer;
+  transition: all 0.2s; margin-bottom: 4px; text-align: left;
+}
+.nav-item:hover { background: rgba(0, 0, 0, 0.04); }
+.nav-item.active { background: var(--sf-accent); color: white; }
+
+.main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; scroll-behavior: smooth; }
+.content-width { width: 100%; max-width: 840px; padding: 60px 40px; }
+
+/* ── Components ────────────────────────────────────────────────────── */
+header { margin-bottom: 48px; }
+header h1 { font-size: 40px; font-weight: 700; letter-spacing: -1.2px; margin-bottom: 8px; }
+header p { color: var(--sf-text-sec); font-size: 19px; }
+
+.glass-card {
+  background: var(--sf-card);
+  backdrop-filter: var(--blur);
+  border: 1px solid var(--sf-border);
+  border-radius: var(--radius);
+  padding: 32px;
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+}
+
+.label { font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--sf-text-sec); margin-bottom: 8px; display: block; letter-spacing: 0.5px; }
+
+.sf-input, .sf-textarea, .sf-select {
+  width: 100%; background: rgba(0, 0, 0, 0.04);
+  border: 1px solid transparent; border-radius: 12px;
+  padding: 14px; font-family: inherit; font-size: 15px;
+  transition: all 0.2s; margin-bottom: 20px; color: var(--sf-text);
+}
+.sf-input:focus, .sf-textarea:focus { outline: none; background: #fff; border-color: var(--sf-accent); box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1); }
+
+.primary-btn {
+  background: var(--sf-accent); color: white; border: none;
+  padding: 16px 32px; border-radius: 30px;
+  font-size: 17px; font-weight: 600; cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); width: 100%;
+}
+.primary-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(0, 122, 255, 0.25); }
+.primary-btn:active { transform: scale(0.98); }
+.primary-btn:disabled { background: var(--sf-text-sec); opacity: 0.5; cursor: not-allowed; }
+
+/* ── Pipeline ── */
+.pipeline { display: flex; justify-content: space-between; margin-bottom: 48px; position: relative; }
+.step { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
+.step-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--sf-border); transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+.step.active .step-dot { background: var(--sf-accent); box-shadow: 0 0 12px var(--sf-accent); transform: scale(1.2); }
+.step.done .step-dot { background: var(--sf-success); }
+.step-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--sf-text-sec); }
+
+/* ── Results Logic UI ── */
+.agent-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.agent-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.agent-name { font-weight: 600; font-size: 18px; letter-spacing: -0.3px; }
+
+.prose p { margin-bottom: 16px; color: var(--sf-text); line-height: 1.6; }
+.cite { display: inline-flex; background: rgba(0,122,255,0.1); color: var(--sf-accent); padding: 1px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; margin: 0 2px; }
+
+/* Table and Records */
+.verdict-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 20px 0; background: rgba(0,0,0,0.02); border-radius: 12px; overflow: hidden; }
+.verdict-table th { text-align: left; color: var(--sf-text-sec); padding: 12px; border-bottom: 1px solid var(--sf-border); font-weight: 600; text-transform: uppercase; font-size: 10px; }
+.verdict-table td { padding: 14px 12px; border-bottom: 1px solid var(--sf-border); vertical-align: top; }
+.for-cell { color: var(--sf-success); font-weight: 500; }
+.against-cell { color: var(--sf-danger); font-weight: 500; }
+
+.memo-box { background: #fff; border: 1px solid var(--sf-border); padding: 20px; border-radius: 12px; font-size: 14px; font-family: inherit; white-space: pre-wrap; color: var(--sf-text); }
+
+/* Recommendation Rows */
+.rec-row { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--sf-border); }
+.rec-num { width: 24px; height: 24px; background: var(--sf-text); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.conf-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; height: fit-content; }
+.conf-HIGH { background: rgba(52,199,89,0.1); color: var(--sf-success); }
+.conf-MEDIUM { background: rgba(255,149,0,0.1); color: #FF9500; }
+.conf-LOW { background: rgba(255,59,48,0.1); color: var(--sf-danger); }
+
+/* Paper Cards */
+.paper-card { background: rgba(0,0,0,0.02); padding: 16px; border-radius: 14px; margin-bottom: 12px; border: 1px solid transparent; transition: 0.2s; }
+.paper-card:hover { border-color: var(--sf-accent); background: #fff; }
+.paper-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+.paper-meta { font-size: 11px; color: var(--sf-text-sec); font-weight: 500; }
+
+/* Status Toast */
+#toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
+.toast { background: rgba(29,29,31,0.9); color: #fff; padding: 12px 24px; border-radius: 25px; font-size: 14px; font-weight: 500; backdrop-filter: blur(10px); animation: slideUp 0.4s ease forwards; }
+
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.hidden { display: none !important; }
+
+/* Skeleton */
+.skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; height: 14px; border-radius: 4px; margin-bottom: 10px; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-name">Perspective</div>
+      <div class="brand-tag">Clinical Intelligence</div>
+    </div>
+    
+    <nav>
+      <button class="nav-item active" data-page="input" onclick="goTo('input')">⊕ New Session</button>
+      <button class="nav-item" data-page="results" onclick="goTo('results')">◈ Analysis</button>
+      <button class="nav-item" data-page="history" onclick="goTo('history')">◎ History</button>
+      <button class="nav-item" data-page="settings" onclick="goTo('settings')">⚙ Settings</button>
+    </nav>
+    
+    <div style="margin-top: auto; padding: 16px; background: rgba(0,0,0,0.03); border-radius: 16px; font-size: 11px;">
+      <div id="api-status" style="display: flex; align-items: center; gap: 6px; font-weight: 600;">
+        <div id="api-dot" style="width:6px; height:6px; border-radius:50%; background: var(--sf-danger);"></div>
+        <span id="api-status-text">Key Missing</span>
+      </div>
+      <div id="session-status" style="margin-top: 6px; color: var(--sf-text-sec); font-weight: 500;">System Idle</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- PAGE: INPUT -->
+    <div id="page-input" class="content-width">
+      <header>
+        <h1>Session Notes.</h1>
+        <p>Intelligence that understands the nuance of therapy.</p>
+      </header>
+
+      <div id="risk-banner" class="hidden" style="background: rgba(255,59,48,0.1); border: 1px solid rgba(255,59,48,0.2); color: var(--sf-danger); padding: 16px; border-radius: 14px; margin-bottom: 24px; font-size: 14px; font-weight: 600;">
+        ⚠️ Risk Language Detected. Review protocols immediately.
+      </div>
+
+      <div class="glass-card">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div>
+            <label class="label">Patient Identifier</label>
+            <input type="text" id="patient-id" class="sf-input" placeholder="e.g. Apollo-12">
+          </div>
+          <div>
+            <label class="label">Session Number</label>
+            <input type="text" id="session-num" class="sf-input" placeholder="e.g. 05">
+          </div>
+        </div>
+
+        <label class="label">Primary Modality</label>
+        <select id="modality" class="sf-select">
+          <option value="CBT">CBT (Cognitive Behavioral)</option>
+          <option value="DBT">DBT (Dialectical)</option>
+          <option value="ACT">ACT (Acceptance & Commitment)</option>
+          <option value="Psychodynamic">Psychodynamic</option>
+          <option value="Somatic">Somatic</option>
+          <option value="Integrative">Integrative</option>
+        </select>
+
+        <label class="label">The Notes</label>
+        <textarea id="session-notes" class="sf-textarea" style="min-height: 240px;" placeholder="Write or paste your post-session notes here..." oninput="checkRisk()"></textarea>
+
+        <label class="label">Previous Context (Optional)</label>
+        <textarea id="prev-context" class="sf-textarea" style="min-height: 80px;" placeholder="Medication, history, or past session themes..."></textarea>
+
+        <button class="primary-btn" id="run-btn" onclick="runPipeline()">Analyze Session</button>
+      </div>
+    </div>
+
+    <!-- PAGE: RESULTS -->
+    <div id="page-results" class="content-width hidden">
+      <header>
+        <h1 id="res-title">The Analysis.</h1>
+        <p id="res-subtitle">Synthesized clinical perspectives.</p>
+      </header>
+
+      <div class="pipeline">
+        <div class="step" id="pstep-risk"><div class="step-dot"></div><span class="step-label">Risk</span></div>
+        <div class="step" id="pstep-scout"><div class="step-dot"></div><span class="step-label">Scout</span></div>
+        <div class="step" id="pstep-analyst"><div class="step-dot"></div><span class="step-label">Analyst</span></div>
+        <div class="step" id="pstep-bonus"><div class="step-dot"></div><span class="step-label">Refining</span></div>
+        <div class="step" id="pstep-judge"><div class="step-dot"></div><span class="step-label">Judge</span></div>
+      </div>
+
+      <!-- Result Sections -->
+      <div id="section-scout" class="glass-card hidden">
+        <div class="agent-header">
+          <div class="agent-icon" style="background:rgba(0,122,255,0.1); color:var(--sf-accent);">🔍</div>
+          <div class="agent-name">Research Scout</div>
+        </div>
+        <div id="scout-body"></div>
+      </div>
+
+      <div id="section-analyst" class="glass-card hidden">
+        <div class="agent-header">
+          <div class="agent-icon" style="background:rgba(52,199,89,0.1); color:var(--sf-success);">🧠</div>
+          <div class="agent-name">Clinical Analyst</div>
+        </div>
+        <div id="analyst-body"></div>
+      </div>
+
+      <div id="section-bonus" class="hidden" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+         <div class="glass-card" style="margin-bottom: 0;">
+            <label class="label">Reframer</label>
+            <div id="bonus-reframe" style="font-size: 13px;"></div>
+         </div>
+         <div class="glass-card" style="margin-bottom: 0;">
+            <label class="label">Progress Tracker</label>
+            <div id="bonus-progress" style="font-size: 13px;"></div>
+         </div>
+         <div class="glass-card" style="grid-column: span 2; margin-bottom: 0;">
+            <label class="label">Session Memo</label>
+            <div id="bonus-memo"></div>
+         </div>
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <button id="devil-btn" class="primary-btn hidden" style="width: auto; background: #1D1D1F; padding: 12px 24px;" onclick="runDevil()">Challenge Analysis 😈</button>
+      </div>
+
+      <div id="section-devil" class="glass-card hidden">
+        <div class="agent-header">
+          <div class="agent-icon" style="background:rgba(255,59,48,0.1); color:var(--sf-danger);">😈</div>
+          <div class="agent-name">Devil's Advocate</div>
+        </div>
+        <div id="devil-body"></div>
+      </div>
+
+      <div id="section-judge" class="glass-card hidden">
+        <div class="agent-header">
+          <div class="agent-icon" style="background:rgba(29,29,31,0.1); color:var(--sf-text);">⚖</div>
+          <div class="agent-name">The Judge</div>
+        </div>
+        <div id="judge-body"></div>
+      </div>
+    </div>
+
+    <!-- PAGE: HISTORY -->
+    <div id="page-history" class="content-width hidden">
+        <header><h1>Session History.</h1></header>
+        <div id="history-list"></div>
+    </div>
+
+    <!-- PAGE: SETTINGS -->
+    <div id="page-settings" class="content-width hidden">
+      <header><h1>Settings.</h1></header>
+      <div class="glass-card">
+        <label class="label">Anthropic API Key</label>
+        <input type="password" id="api-key-input" class="sf-input" placeholder="sk-ant-...">
+        <button class="primary-btn" onclick="saveApiKey()">Update Credentials</button>
+        <p style="font-size: 11px; color: var(--sf-text-sec); margin-top: 16px;">Key is stored locally in your browser cache.</p>
+      </div>
+    </main>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+// ─── STATE & CONFIG ──────────────────────────────────────────────────
+const MODEL = "claude-3-5-sonnet-20240620";
+let API_KEY = localStorage.getItem("sanby_api_key") || "";
+let sessionHistory = JSON.parse(localStorage.getItem("sanby_history") || "[]");
+let lastAnalystOutput = "";
+let lastScoutOutput = "";
+let lastNotesContext = "";
+let pipelineRunning = false;
+
+const RISK_TERMS = ["suicid", "self-harm", "hurt myself", "end my life", "overdose", "harm to others"];
+
+// ─── CORE LOGIC ──────────────────────────────────────────────────────
+
+function goTo(page) {
+  document.querySelectorAll(".content-width").forEach(el => el.classList.add("hidden"));
+  document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
+  const target = document.getElementById("page-" + page);
+  target.classList.remove("hidden");
+  
+  // Animation reset
+  target.style.animation = 'none'; target.offsetHeight; target.style.animation = '';
+  document.querySelector(`[data-page="${page}"]`).classList.add("active");
+  
+  if(page === 'history') renderHistory();
+}
+
+function saveApiKey() {
+  const key = document.getElementById("api-key-input").value.trim();
+  if(!key) return showToast("Enter a valid key.");
+  API_KEY = key;
+  localStorage.setItem("sanby_api_key", key);
+  updateApiUI();
+  showToast("Settings Saved.");
+}
+
+function updateApiUI() {
+  const dot = document.getElementById("api-dot");
+  const text = document.getElementById("api-status-text");
+  if(API_KEY.startsWith("sk-")) {
+    dot.style.background = "var(--sf-success)";
+    text.textContent = "API Connected";
+  } else {
+    dot.style.background = "var(--sf-danger)";
+    text.textContent = "Key Missing";
+  }
+}
+
+function checkRisk() {
+  const notes = document.getElementById("session-notes").value.toLowerCase();
+  const found = RISK_TERMS.some(t => notes.includes(t));
+  document.getElementById("risk-banner").classList.toggle("hidden", !found);
+}
+
+// ─── EXTERNAL APIs ───────────────────────────────────────────────────
+
+async function searchSemanticScholar(query) {
+  try {
+    const res = await fetch(`https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&limit=4&fields=title,authors,year,abstract`);
+    const data = await res.json();
+    return (data.data || []).map(p => ({
+      title: p.title, authors: (p.authors||[]).slice(0,2).map(a=>a.name).join(", "),
+      year: p.year, abstract: p.abstract ? p.abstract.slice(0,200)+"..." : "No abstract available."
+    }));
+  } catch { return []; }
+}
+
+async function searchPubMed(query) {
+  try {
+    const sRes = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(query)}&retmax=3&retmode=json`);
+    const sData = await sRes.json();
+    const ids = sData.esearchresult.idlist;
+    if(!ids.length) return [];
+    const sumRes = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${ids.join(",")}&retmode=json`);
+    const sumData = await sumRes.json();
+    return ids.map(id => ({
+      title: sumData.result[id].title, authors: sumData.result[id].authors[0].name,
+      year: sumData.result[id].pubdate.slice(0,4), abstract: "Research study from PubMed database."
+    }));
+  } catch { return []; }
+}
+
+async function callClaude(system, user) {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json", "x-api-key": API_KEY,
+      "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({ model: MODEL, max_tokens: 1500, system, messages: [{role:"user", content:user}] })
+  });
+  if(!res.ok) throw new Error("API Error");
+  const data = await res.json();
+  return data.content[0].text;
+}
+
+// ─── PIPELINE ────────────────────────────────────────────────────────
+
+async function runPipeline() {
+  const notes = document.getElementById("session-notes").value.trim();
+  if(!API_KEY) return goTo('settings');
+  if(!notes) return showToast("Enter session notes.");
+  if(pipelineRunning) return;
+
+  pipelineRunning = true;
+  goTo('results');
+  document.getElementById("run-btn").disabled = true;
+  document.getElementById("session-status").textContent = "Analyzing...";
+
+  // Reset UI
+  document.querySelectorAll(".step").forEach(s => s.classList.remove("active", "done"));
+  ["section-scout", "section-analyst", "section-bonus", "section-judge", "section-devil", "devil-btn"].forEach(id => document.getElementById(id).classList.add("hidden"));
+
+  try {
+    // 0. Risk
+    setStep('risk', 'active');
+    await new Promise(r => setTimeout(r, 500)); // UI feel
+    setStep('risk', 'done');
+
+    // 1. Research Scout
+    setStep('scout', 'active');
+    document.getElementById("section-scout").classList.remove("hidden");
+    document.getElementById("scout-body").innerHTML = `<div class="skeleton"></div><div class="skeleton"></div>`;
+    
+    const queriesRaw = await callClaude("Extract 2 academic search queries from these notes. Return ONLY a JSON array of strings.", notes);
+    let queries = ["Psychotherapy evidence"];
+    try { queries = JSON.parse(queriesRaw); } catch(e) {}
+    
+    const papers = await Promise.all([searchSemanticScholar(queries[0]), searchPubMed(queries[1] || queries[0])]);
+    const allPapers = papers.flat().slice(0,6);
+    lastScoutOutput = allPapers.map((p,i) => `[${i+1}] ${p.title} (${p.year})`).join("\n");
+    
+    document.getElementById("scout-body").innerHTML = allPapers.map(p => `
+      <div class="paper-card">
+        <div class="paper-title">${p.title}</div>
+        <div class="paper-meta">${p.authors} · ${p.year}</div>
+      </div>
+    `).join("") || "No external papers found.";
+    setStep('scout', 'done');
+
+    // 2. Analyst
+    setStep('analyst', 'active');
+    document.getElementById("section-analyst").classList.remove("hidden");
+    document.getElementById("analyst-body").innerHTML = `<div class="skeleton"></div><div class="skeleton" style="width:60%"></div>`;
+    
+    const analystPrompt = `Synthesize evidence. Rules: Reference papers by [num]. Structure: THEMES, SYNTHESIS, RECOMMENDATIONS (Confidence: HIGH/MED/LOW), AGENDA.`;
+    const analystInput = `NOTES: ${notes}\nRESEARCH: ${lastScoutOutput}`;
+    lastAnalystOutput = await callClaude(analystPrompt, analystInput);
+    renderAnalyst(lastAnalystOutput);
+    setStep('analyst', 'done');
+
+    // 3. Bonus Agents
+    setStep('bonus', 'active');
+    document.getElementById("section-bonus").classList.remove("hidden");
+    const [prog, refr, memo] = await Promise.all([
+      callClaude("Describe clinical trajectory in 3 sentences.", notes),
+      callClaude("Provide 3 reframes: CBT, Attachment, Somatic. Format as label: text", notes),
+      callClaude("Write a professional session memo for records.", notes)
+    ]);
+    document.getElementById("bonus-progress").textContent = prog;
+    document.getElementById("bonus-reframe").textContent = refr;
+    document.getElementById("bonus-memo").innerHTML = `<div class="memo-box">${memo}</div>`;
+    setStep('bonus', 'done');
+
+    // 4. Judge
+    setStep('judge', 'active');
+    document.getElementById("section-judge").classList.remove("hidden");
+    await runJudge(lastAnalystOutput);
+    setStep('judge', 'done');
+    
+    document.getElementById("devil-btn").classList.remove("hidden");
+    saveHistory(notes);
+
+  } catch (e) {
+    showToast("Error occurred during analysis.");
+    console.error(e);
+  } finally {
+    pipelineRunning = false;
+    document.getElementById("run-btn").disabled = false;
+    document.getElementById("session-status").textContent = "Idle";
+  }
+}
+
+function renderAnalyst(text) {
+  // Logic to parse the structured text and convert to Apple UI components
+  let html = `<div class="prose">`;
+  const lines = text.split("\n");
+  lines.forEach(line => {
+    if(line.includes("Confidence:")) {
+      const conf = line.match(/HIGH|MEDIUM|LOW/)?.[0] || "MEDIUM";
+      const clean = line.replace(/Confidence:.*$/i, "").replace(/^\d+\.\s*/, "");
+      html += `<div class="rec-row">
+        <div class="rec-num">!</div>
+        <div style="flex:1">${clean.replace(/\[(\d+)\]/g, '<span class="cite">[$1]</span>')}</div>
+        <div class="conf-badge conf-${conf}">${conf}</div>
+      </div>`;
+    } else if(line.length > 5) {
+      html += `<p>${line}</p>`;
+    }
+  });
+  html += `</div>`;
+  document.getElementById("analyst-body").innerHTML = html;
+}
+
+async function runJudge(analystOut, devilOut = "") {
+  const prompt = `Arbitrate the plan. Provide: FOR/AGAINST TABLE, VERDICT, PROCEED? (PROCEED/CAUTION/REVISE).`;
+  const verdict = await callClaude(prompt, `ANALYST: ${analystOut}\nDEVIL: ${devilOut}`);
+  
+  let html = `<div class="prose"><p>${verdict.replace(/\n/g, '<br>')}</p></div>`;
+  // Simple table parsing simulation
+  if(verdict.includes("|")) {
+      html = `<table class="verdict-table"><thead><tr><th>Recommendation</th><th>Pros</th><th>Cons</th></tr></thead><tbody>`;
+      verdict.split("\n").filter(l => l.includes("|")).forEach(row => {
+          const cols = row.split("|").map(c => c.trim());
+          if(cols.length >= 3) html += `<tr><td>${cols[0]}</td><td class="for-cell">✓ ${cols[1]}</td><td class="against-cell">✗ ${cols[2]}</td></tr>`;
+      });
+      html += `</tbody></table>` + `<p>${verdict.split("VERDICT")[1] || ""}</p>`;
+  }
+  document.getElementById("judge-body").innerHTML = html;
+}
+
+async function runDevil() {
+    const btn = document.getElementById("devil-btn");
+    btn.disabled = true; btn.textContent = "😈 Challenging...";
+    document.getElementById("section-devil").classList.remove("hidden");
+    document.getElementById("devil-body").innerHTML = `<div class="skeleton"></div>`;
+    
+    try {
+        const devilOut = await callClaude("Be an adversarial supervisor. Find blind spots in the Analyst's plan.", lastAnalystOutput);
+        document.getElementById("devil-body").innerHTML = `<div class="prose"><p>${devilOut.replace(/\n/g, '<br>')}</p></div>`;
+        await runJudge(lastAnalystOutput, devilOut);
+        showToast("Devil's Advocate synthesized.");
+    } catch (e) { showToast("Devil error."); }
+    btn.textContent = "Challenge Analysis 😈"; btn.disabled = false;
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────────
+
+function setStep(id, status) {
+  const el = document.getElementById('pstep-'+id);
+  if(status === 'active') el.classList.add('active');
+  if(status === 'done') { el.classList.remove('active'); el.classList.add('done'); }
+}
+
+function showToast(msg) {
+  const container = document.getElementById("toast-container");
+  const t = document.createElement("div"); t.className = "toast"; t.textContent = msg;
+  container.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+function saveHistory(notes) {
+    const entry = {
+        id: Date.now(),
+        patient: document.getElementById("patient-id").value || "Anonymous",
+        session: document.getElementById("session-num").value || "N/A",
+        date: new Date().toLocaleDateString(),
+        notes: notes.slice(0, 100) + "..."
+    };
+    sessionHistory.unshift(entry);
+    localStorage.setItem("sanby_history", JSON.stringify(sessionHistory.slice(0,10)));
+}
+
+function renderHistory() {
+    const list = document.getElementById("history-list");
+    if(!sessionHistory.length) return list.innerHTML = `<p style="text-align:center; color:var(--sf-text-sec)">No sessions recorded yet.</p>`;
+    list.innerHTML = sessionHistory.map(h => `
+        <div class="glass-card" style="padding:20px; margin-bottom:12px">
+            <div style="display:flex; justify-content:space-between">
+                <span style="font-weight:700">${h.patient} · Session ${h.session}</span>
+                <span style="font-size:11px; color:var(--sf-text-sec)">${h.date}</span>
+            </div>
+            <p style="font-size:13px; margin-top:8px; color:var(--sf-text-sec)">${h.notes}</p>
+        </div>
+    `).join("");
+}
+
+(function boot() {
+  updateApiUI();
+  if(API_KEY) document.getElementById("api-key-input").value = API_KEY;
+})();
+</script>
+</body>
+</html>
