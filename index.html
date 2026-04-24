@@ -628,6 +628,10 @@ input,textarea,select{font-family:inherit}
           <button id="re-judge-btn" class="devil-btn hidden" style="background:rgba(44,51,64,.08);border-color:rgba(44,51,64,.2);color:var(--slate);font-size:12px;padding:6px 12px" onclick="runJudge()">Re-Judge</button>
         </div>
         <div class="result-card-body" id="judge-body"></div>
+        <div class="result-card-body" id="report-export-bar" style="border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+          <button class="devil-btn" style="background:rgba(44,51,64,.08);border-color:rgba(44,51,64,.2);color:var(--slate)" onclick="downloadReportDoc()">Download DOC</button>
+          <button class="devil-btn" style="background:var(--slate);border-color:var(--slate);color:#F5F0E8" onclick="downloadReportPdf()">Download PDF</button>
+        </div>
       </div>
     </div>
 
@@ -1326,6 +1330,114 @@ function renderHistory(){
     </div>`).join("");
 }
 
+function escapeHtml(value){
+  return String(value || "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/\"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+function reportFileBase(){
+  const patientId = (document.getElementById("patient-id")?.value || "anonymous").trim() || "anonymous";
+  const sessionNum = (document.getElementById("session-num")?.value || "session").trim() || "session";
+  const safe = `${patientId}_${sessionNum}`.replace(/[^a-z0-9_-]+/gi, "_").replace(/_+/g, "_").replace(/^_|_$/g, "");
+  return `perspective_ai_report_${safe || "session"}`;
+}
+
+function getPrintableSectionHtml(title, bodyId){
+  const el = document.getElementById(bodyId);
+  if(!el || !el.innerHTML.trim()) return "";
+  return `<section class="report-section"><h2>${escapeHtml(title)}</h2>${el.innerHTML}</section>`;
+}
+
+function buildReportHtml(){
+  const patientId = (document.getElementById("patient-id")?.value || "Anonymous").trim() || "Anonymous";
+  const sessionNum = (document.getElementById("session-num")?.value || "Unknown").trim() || "Unknown";
+  const modality = (document.getElementById("modality")?.value || "Not specified").trim() || "Not specified";
+  const notes = document.getElementById("session-notes")?.value || "";
+  const prevContext = document.getElementById("prev-context")?.value || "";
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Perspective AI Report</title>
+<style>
+body{font-family:Georgia,serif;color:#1A1610;line-height:1.6;padding:32px;max-width:900px;margin:0 auto;background:#fff}
+h1,h2,h3{font-family:Georgia,serif;color:#2C3340}
+h1{font-size:28px;margin:0 0 8px}
+h2{font-size:18px;margin:28px 0 12px;padding-bottom:6px;border-bottom:1px solid #ddd}
+p,li,td,th,div{font-size:13px}
+.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0 24px}
+.meta-box{border:1px solid #ddd;border-radius:8px;padding:10px 12px;background:#faf8f3}
+.label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#7A7060;margin-bottom:4px}
+.notes-box{white-space:pre-wrap;border:1px solid #ddd;border-radius:8px;padding:14px;background:#faf8f3}
+.report-section{margin-top:24px}
+.memo-box,.prose,.paper-card{margin-bottom:12px}
+.paper-card,.memo-box{border:1px solid #ddd;border-radius:8px;padding:12px;background:#faf8f3}
+.paper-title{font-weight:700;margin-bottom:4px}
+.paper-meta,.result-card-subtitle,.judge-verdict-label,.section-label,.paper-relevance,.rec-confidence,.cite{font-size:11px;color:#6b6255}
+.rec-row{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #eee}
+.rec-row:last-child{border-bottom:none}
+.rec-num{font-weight:700;min-width:20px}.rec-text{flex:1}
+.verdict-table{width:100%;border-collapse:collapse;margin-top:8px}
+.verdict-table th,.verdict-table td{border:1px solid #ddd;padding:8px;vertical-align:top}
+.judge-verdict{border:1px solid #ddd;border-radius:8px;padding:14px;background:#f3f1ec;margin-top:16px}
+.judge-proceed{display:inline-block;margin-top:10px;font-weight:700}
+</style>
+</head>
+<body>
+  <h1>Perspective AI Clinical Report</h1>
+  <div>${new Date().toLocaleString("en-IN", { dateStyle:"medium", timeStyle:"short" })}</div>
+  <div class="meta">
+    <div class="meta-box"><div class="label">Patient</div><div>${escapeHtml(patientId)}</div></div>
+    <div class="meta-box"><div class="label">Session</div><div>${escapeHtml(sessionNum)}</div></div>
+    <div class="meta-box"><div class="label">Modality</div><div>${escapeHtml(modality)}</div></div>
+  </div>
+  <section class="report-section">
+    <h2>Session Notes</h2>
+    <div class="notes-box">${escapeHtml(notes)}</div>
+  </section>
+  ${prevContext.trim() ? `<section class="report-section"><h2>Previous Context</h2><div class="notes-box">${escapeHtml(prevContext)}</div></section>` : ""}
+  ${getPrintableSectionHtml("Research Scout", "scout-body")}
+  ${getPrintableSectionHtml("Clinical Analyst", "analyst-body")}
+  ${getPrintableSectionHtml("Progress Tracker", "bonus-progress")}
+  ${getPrintableSectionHtml("Alternative Framings", "bonus-reframe")}
+  ${getPrintableSectionHtml("Session Memo", "bonus-memo")}
+  ${document.getElementById("section-devil") && !document.getElementById("section-devil").classList.contains("hidden") ? getPrintableSectionHtml("Devil's Advocate", "devil-body") : ""}
+  ${getPrintableSectionHtml("Judge", "judge-body")}
+</body>
+</html>`;
+}
+
+function downloadReportDoc(){
+  if(!lastAnalystOutput){ showToast("Run the main analysis first","error"); return; }
+  const html = buildReportHtml();
+  const blob = new Blob(["\ufeff", html], { type: "application/msword" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${reportFileBase()}.doc`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function downloadReportPdf(){
+  if(!lastAnalystOutput){ showToast("Run the main analysis first","error"); return; }
+  const printWindow = window.open("", "_blank", "width=900,height=700");
+  if(!printWindow){ showToast("Allow pop-ups to export PDF","error"); return; }
+  printWindow.document.open();
+  printWindow.document.write(buildReportHtml());
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => {
+    printWindow.print();
+  }, 350);
+}
 // ─── Toast ────────────────────────────────────────────────────────────
 function showToast(msg, type="info"){
   const tc = document.getElementById("toasts");
