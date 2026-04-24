@@ -854,6 +854,42 @@ async function searchPubMed(query, limit=4){
   } catch { return []; }
 }
 
+function rankAndSelectPapers(papers, queries, limit=10){
+  const terms = queries
+    .join(" ")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(term => term.length > 2);
+
+  const deduped = [];
+  const seen = new Set();
+  for(const paper of papers){
+    const key = (paper.doi || paper.pmid || paper.title || "")
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim();
+    if(!key || seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(paper);
+  }
+
+  return deduped
+    .map(paper => {
+      const haystack = `${paper.title || ""} ${paper.abstract || ""}`.toLowerCase();
+      let score = 0;
+      for(const term of terms){
+        if(haystack.includes(term)) score += 3;
+        if((paper.title || "").toLowerCase().includes(term)) score += 2;
+      }
+      const year = Number.parseInt(paper.year, 10);
+      if(Number.isFinite(year)) score += Math.max(0, year - 2000) * 0.05;
+      if(paper.source === "PubMed") score += 0.5;
+      return { ...paper, score };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+}
+
 // ─── Pipeline steps ───────────────────────────────────────────────────
 function setPipelineStep(stepId, status){
   const el = document.getElementById("pstep-"+stepId);
@@ -939,18 +975,21 @@ async function runPipeline(){
     let queries = [];
     try { queries = JSON.parse(keywordsRaw.trim()); } catch { queries = ["therapy session " + modality, "psychotherapy evidence based"]; }
 
-    // Fetch papers
-    const [ssResults, pubmedResults] = await Promise.all([
-      searchSemanticScholar(queries[0] || "psychotherapy evidence", 5),
-      searchPubMed(queries[1] || queries[0] || "mental health treatment", 3)
+        // Fetch a wide research pool, then rank down to the strongest 10
+    const [ssPrimary, ssSecondary, pubmedPrimary, pubmedSecondary] = await Promise.all([
+      searchSemanticScholar(queries[0] || "psychotherapy evidence", 35),
+      searchSemanticScholar(queries[1] || queries[0] || "mental health treatment", 25),
+      searchPubMed(queries[0] || "psychotherapy evidence", 20),
+      searchPubMed(queries[1] || queries[0] || "mental health treatment", 20)
     ]);
-    const allPapers = [...ssResults, ...pubmedResults].slice(0,7);
+    const candidatePapers = [...ssPrimary, ...ssSecondary, ...pubmedPrimary, ...pubmedSecondary].slice(0,100);
+    const allPapers = rankAndSelectPapers(candidatePapers, queries, 10);
     lastScoutOutput = allPapers.map((p,i)=>`[${i+1}] ${p.title} (${p.authors}, ${p.year}). ${p.abstract}`).join("\n\n");
 
     // Render papers
     if(allPapers.length){
       document.getElementById("scout-body").innerHTML =
-        `<div class="section-label">Found ${allPapers.length} relevant papers</div>` +
+        `<div class="section-label">Reviewed ${candidatePapers.length} papers, selected top ${allPapers.length}</div>` +
         allPapers.map((p,i) => `
           <div class="paper-card">
             <div class="paper-title">${p.title}</div>
