@@ -657,21 +657,21 @@ input,textarea,select{font-family:inherit}
     </div>
 
     <div class="settings-card anim-fade-up">
-      <h3>Anthropic API Key</h3>
-      <p>Your API key is stored in <code>localStorage</code> in this browser only. It is never sent to any server other than Anthropic's API directly from your browser.</p>
+      <h3>Google Gemini API Key</h3>
+      <p>Your API key is stored in <code>localStorage</code> in this browser only. It is never sent to any server other than Google's Gemini API directly from your browser.</p>
       <div class="api-key-row">
-        <input class="api-key-input" id="api-key-input" type="password" placeholder="sk-ant-api03-..."/>
+        <input class="api-key-input" id="api-key-input" type="password" placeholder="AIza..."/>
         <button class="btn-save" onclick="saveApiKey()">Save</button>
       </div>
       <div class="note-box">
-        <strong>Free tier:</strong> Anthropic gives $5 in free credits on signup — more than enough for hundreds of session analyses. Get your key at <strong>console.anthropic.com</strong>.
-        The model used is <code>claude-sonnet-4-20250514</code>.
+        <strong>Free tier:</strong> Google AI Studio offers a generous free tier for Gemini usage. Get your key at <strong>aistudio.google.com</strong>.
+        The model used is <code>gemini-2.0-flash</code>.
       </div>
     </div>
 
     <div class="settings-card anim-fade-up" style="animation-delay:.08s">
       <h3>How it Works</h3>
-      <p>All Claude API calls are made directly from your browser — there is no intermediary server. Your session notes go from your browser to Anthropic's API and nowhere else. No data is stored externally.</p>
+      <p>All Gemini API calls are made directly from your browser — there is no intermediary server. Your session notes go from your browser to Google's Gemini API and nowhere else. No data is stored externally.</p>
       <div class="note-box" style="margin-top:0">
         <strong>Research sources:</strong> The Research Scout uses the Semantic Scholar public API and PubMed E-utilities — both free, no key required. Papers are fetched in real time based on your session themes.
       </div>
@@ -688,7 +688,7 @@ input,textarea,select{font-family:inherit}
 ══════════════════════════════════════════════════════════ -->
 <script>
 // ─── Config ──────────────────────────────────────────────────────────
-const MODEL = "claude-sonnet-4-20250514";
+const MODEL = "gemini-2.0-flash";
 let API_KEY = localStorage.getItem("sanby_api_key") || "";
 
 // ─── State ───────────────────────────────────────────────────────────
@@ -742,7 +742,7 @@ function saveApiKey(){
 function updateApiStatus(){
   const dot  = document.getElementById("api-dot");
   const text = document.getElementById("api-status-text");
-  if(API_KEY && API_KEY.startsWith("sk-")){
+  if(API_KEY && API_KEY.length > 10){
     dot.className  = "api-dot ok";
     text.textContent = "API connected";
   } else {
@@ -771,22 +771,26 @@ function onNotesInput(){
   }
 }
 
-// ─── Claude API call ─────────────────────────────────────────────────
+// ─── Gemini API call ─────────────────────────────────────────────────
 async function callClaude(systemPrompt, userMessage, maxTokens=1500){
   if(!API_KEY){ throw new Error("No API key configured. Go to Settings."); }
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent(API_KEY)}`, {
     method:"POST",
     headers:{
-      "Content-Type":"application/json",
-      "x-api-key": API_KEY,
-      "anthropic-version":"2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true"
+      "Content-Type":"application/json"
     },
     body: JSON.stringify({
-      model: MODEL,
-      max_tokens: maxTokens,
-      system: systemPrompt,
-      messages:[{ role:"user", content: userMessage }]
+      systemInstruction: {
+        parts: [{ text: systemPrompt }]
+      },
+      contents: [{
+        role: "user",
+        parts: [{ text: userMessage }]
+      }],
+      generationConfig: {
+        maxOutputTokens: maxTokens,
+        temperature: 0.4
+      }
     })
   });
   if(!res.ok){
@@ -794,7 +798,7 @@ async function callClaude(systemPrompt, userMessage, maxTokens=1500){
     throw new Error(err.error?.message || `HTTP ${res.status}`);
   }
   const data = await res.json();
-  return data.content?.[0]?.text || "";
+  return data.candidates?.[0]?.content?.parts?.map(part => part.text || "").join("") || "";
 }
 
 // ─── Research Scout (Semantic Scholar + PubMed) ───────────────────────
@@ -876,7 +880,7 @@ async function runPipeline(){
   const prevCtx  = document.getElementById("prev-context").value.trim();
 
   if(!notes){ showToast("Please enter session notes first","error"); return; }
-  if(!API_KEY || !API_KEY.startsWith("sk-")){
+  if(!API_KEY || API_KEY.length <= 10){
     showToast("Set your API key in Settings first","error");
     goTo("settings"); return;
   }
@@ -1335,3 +1339,4 @@ document.addEventListener("keydown", e => {
 </script>
 </body>
 </html>
+
