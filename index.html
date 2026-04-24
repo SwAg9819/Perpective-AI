@@ -657,21 +657,21 @@ input,textarea,select{font-family:inherit}
     </div>
 
     <div class="settings-card anim-fade-up">
-      <h3>Google Gemini API Key</h3>
-      <p>Your API key is stored in <code>localStorage</code> in this browser only. It is never sent to any server other than Google's Gemini API directly from your browser.</p>
+      <h3>OpenRouter API Key</h3>
+      <p>Your API key is stored in <code>localStorage</code> in this browser only. It is never sent to any server other than OpenRouter directly from your browser.</p>
       <div class="api-key-row">
-        <input class="api-key-input" id="api-key-input" type="password" placeholder="AIza..."/>
+        <input class="api-key-input" id="api-key-input" type="password" placeholder="sk-or-v1-..."/>
         <button class="btn-save" onclick="saveApiKey()">Save</button>
       </div>
       <div class="note-box">
-        <strong>Free tier:</strong> Google AI Studio offers a generous free tier for Gemini usage. Get your key at <strong>aistudio.google.com</strong>.
-        The model used is <code>gemini-2.0-flash</code>.
+        <strong>Free tier:</strong> Use your OpenRouter credits and key from <strong>openrouter.ai</strong>.
+        The model used is <code>google/gemini-2.0-flash-001</code>.
       </div>
     </div>
 
     <div class="settings-card anim-fade-up" style="animation-delay:.08s">
       <h3>How it Works</h3>
-      <p>All Gemini API calls are made directly from your browser — there is no intermediary server. Your session notes go from your browser to Google's Gemini API and nowhere else. No data is stored externally.</p>
+      <p>All model API calls are made directly from your browser through OpenRouter — there is no intermediary server. Your session notes go from your browser to OpenRouter and the routed model provider only. No data is stored by this app externally.</p>
       <div class="note-box" style="margin-top:0">
         <strong>Research sources:</strong> The Research Scout uses the Semantic Scholar public API and PubMed E-utilities — both free, no key required. Papers are fetched in real time based on your session themes.
       </div>
@@ -688,7 +688,7 @@ input,textarea,select{font-family:inherit}
 ══════════════════════════════════════════════════════════ -->
 <script>
 // ─── Config ──────────────────────────────────────────────────────────
-const MODEL = "gemini-2.0-flash";
+const MODEL = "google/gemini-2.0-flash-001";
 let API_KEY = localStorage.getItem("sanby_api_key") || "";
 
 // ─── State ───────────────────────────────────────────────────────────
@@ -774,23 +774,22 @@ function onNotesInput(){
 // ─── Gemini API call ─────────────────────────────────────────────────
 async function callClaude(systemPrompt, userMessage, maxTokens=1500){
   if(!API_KEY){ throw new Error("No API key configured. Go to Settings."); }
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent(API_KEY)}`, {
+  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method:"POST",
     headers:{
-      "Content-Type":"application/json"
+      "Authorization": `Bearer ${API_KEY}`,
+      "Content-Type":"application/json",
+      "HTTP-Referer": window.location.href,
+      "X-Title": "Perspective AI"
     },
     body: JSON.stringify({
-      systemInstruction: {
-        parts: [{ text: systemPrompt }]
-      },
-      contents: [{
-        role: "user",
-        parts: [{ text: userMessage }]
-      }],
-      generationConfig: {
-        maxOutputTokens: maxTokens,
-        temperature: 0.4
-      }
+      model: MODEL,
+      max_tokens: maxTokens,
+      temperature: 0.4,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userMessage }
+      ]
     })
   });
   if(!res.ok){
@@ -798,7 +797,12 @@ async function callClaude(systemPrompt, userMessage, maxTokens=1500){
     throw new Error(err.error?.message || `HTTP ${res.status}`);
   }
   const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.map(part => part.text || "").join("") || "";
+  const message = data.choices?.[0]?.message?.content;
+  return typeof message === "string"
+    ? message
+    : Array.isArray(message)
+      ? message.map(part => typeof part === "string" ? part : part?.text || "").join("")
+      : "";
 }
 
 // ─── Research Scout (Semantic Scholar + PubMed) ───────────────────────
