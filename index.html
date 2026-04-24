@@ -3,592 +3,1335 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Perspective — Clinical Intelligence</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<title>Perspective AI — Clinical Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@300;400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
 <style>
-/* ── Apple Design Language: The Foundation ────────────────────────── */
-:root {
-  --sf-bg: #F5F5F7;
-  --sf-card: rgba(255, 255, 255, 0.8);
-  --sf-text: #1D1D1F;
-  --sf-text-sec: #86868B;
-  --sf-accent: #007AFF;
-  --sf-danger: #FF3B30;
-  --sf-success: #34C759;
-  --sf-border: rgba(0, 0, 0, 0.08);
-  --blur: saturate(180%) blur(20px);
-  --shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
-  --radius: 18px;
+/* ── Reset ─────────────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:    #1A1610;
+  --paper:  #F5F0E8;
+  --paper2: #EDE7D9;
+  --paper3: #E4DCCA;
+  --amber:  #C4783A;
+  --amber2: #D98B4A;
+  --amber3: rgba(196,120,58,.12);
+  --slate:  #2C3340;
+  --slate2: #3A4455;
+  --slate3: #4A5568;
+  --muted:  #7A7060;
+  --danger: #B04040;
+  --dangerBg: rgba(176,64,64,.1);
+  --success:#3A7A4A;
+  --successBg: rgba(58,122,74,.1);
+  --border: rgba(26,22,16,.1);
+  --r: 10px;--rs:6px;
+  --shadow: 0 2px 12px rgba(26,22,16,.08);
+  --shadow-lg: 0 8px 32px rgba(26,22,16,.12);
 }
+html,body{min-height:100%;font-family:'Lato',sans-serif;background:var(--paper);color:var(--ink);line-height:1.6;font-size:14px}
+h1,h2,h3,h4{font-family:'Playfair Display',serif;line-height:1.25}
+code,pre,.mono{font-family:'JetBrains Mono',monospace}
+button{cursor:pointer;font-family:inherit}
+input,textarea,select{font-family:inherit}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--paper2)}
+::-webkit-scrollbar-thumb{background:var(--paper3);border-radius:4px}
+.hidden{display:none!important}
 
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
-
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: var(--sf-bg);
-  color: var(--sf-text);
-  line-height: 1.5;
-  height: 100vh;
-  overflow: hidden;
-}
+/* ── Animations ─────────────────────────────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.anim-fade-up{animation:fadeUp .4s ease both}
+.anim-fade{animation:fadeIn .3s ease both}
 
 /* ── Layout ─────────────────────────────────────────────────────────── */
-.app { display: flex; height: 100vh; }
+.app{display:flex;min-height:100vh}
 
-.sidebar {
-  width: 260px;
-  background: rgba(245, 245, 247, 0.6);
-  backdrop-filter: var(--blur);
-  border-right: 1px solid var(--sf-border);
-  display: flex;
-  flex-direction: column;
-  padding: 40px 20px;
-  z-index: 100;
+/* ── Sidebar ─────────────────────────────────────────────────────────── */
+.sidebar{
+  width:220px;flex-shrink:0;background:var(--slate);
+  display:flex;flex-direction:column;padding:0;
+  position:sticky;top:0;height:100vh;overflow:hidden;
+}
+.sidebar-top{padding:28px 20px 20px}
+.sidebar-logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#F5F0E8;letter-spacing:-.3px;margin-bottom:2px}
+.sidebar-logo span{color:var(--amber2);font-style:italic}
+.sidebar-tagline{font-size:10px;color:rgba(245,240,232,.35);text-transform:uppercase;letter-spacing:.12em;font-family:'JetBrains Mono',monospace}
+.sidebar-divider{height:1px;background:rgba(255,255,255,.06);margin:16px 0}
+.sidebar-nav{padding:0 10px;flex:1}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--rs);
+  color:rgba(245,240,232,.5);font-size:13px;cursor:pointer;transition:all .15s;
+  margin-bottom:2px;border:1px solid transparent;background:transparent;width:100%;
+  text-align:left;font-family:'Lato',sans-serif;
+}
+.nav-item:hover{color:rgba(245,240,232,.85);background:rgba(255,255,255,.05)}
+.nav-item.active{color:#F5F0E8;background:rgba(196,120,58,.2);border-color:rgba(196,120,58,.3)}
+.nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0}
+.sidebar-session-info{padding:16px 20px;border-top:1px solid rgba(255,255,255,.06)}
+.session-status{display:flex;align-items:center;gap:7px;font-size:11px;color:rgba(245,240,232,.4);font-family:'JetBrains Mono',monospace}
+.session-dot{width:6px;height:6px;border-radius:50%;background:rgba(245,240,232,.2);flex-shrink:0}
+.session-dot.active{background:#5BAD6F;animation:pulse 2s ease infinite}
+.session-dot.warning{background:var(--amber2)}
+
+/* ── Main content ────────────────────────────────────────────────────── */
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column}
+
+/* ── Top bar ─────────────────────────────────────────────────────────── */
+.topbar{
+  height:52px;background:var(--paper);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 28px;gap:16px;
+  position:sticky;top:0;z-index:50;
+}
+.topbar-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--ink)}
+.topbar-subtitle{font-size:12px;color:var(--muted);margin-left:2px}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.api-status{display:flex;align-items:center;gap:6px;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);padding:5px 10px;background:var(--paper2);border:1px solid var(--border);border-radius:20px}
+.api-dot{width:6px;height:6px;border-radius:50%;background:var(--muted)}
+.api-dot.ok{background:var(--success)}
+.api-dot.err{background:var(--danger)}
+
+/* ── Content area ────────────────────────────────────────────────────── */
+.content{flex:1;overflow-y:auto;padding:28px;max-width:900px;width:100%}
+
+/* ── Page: Input ─────────────────────────────────────────────────────── */
+#page-input .page-header{margin-bottom:24px}
+.page-header h2{font-size:26px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.page-header p{font-size:14px;color:var(--muted)}
+
+.input-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
+.input-card-header{padding:14px 18px;background:var(--paper2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.input-card-header h3{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--ink)}
+.input-card-body{padding:18px}
+
+.session-textarea{
+  width:100%;min-height:200px;padding:14px;border:1px solid var(--border);
+  border-radius:var(--rs);background:var(--paper);color:var(--ink);
+  font-size:14px;line-height:1.7;resize:vertical;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+  font-family:'Lato',sans-serif;
+}
+.session-textarea:focus{border-color:var(--amber);box-shadow:0 0 0 3px var(--amber3)}
+.session-textarea::placeholder{color:var(--muted);font-style:italic}
+
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.form-input,.form-select{
+  padding:9px 12px;border:1px solid var(--border);border-radius:var(--rs);
+  background:var(--paper);color:var(--ink);font-size:13px;outline:none;
+  transition:border-color .2s;
+}
+.form-input:focus,.form-select:focus{border-color:var(--amber)}
+.form-select option{background:#fff}
+
+.run-btn{
+  width:100%;padding:14px;border:none;border-radius:var(--rs);
+  background:var(--slate);color:#F5F0E8;font-size:14px;font-weight:700;
+  font-family:'Playfair Display',serif;letter-spacing:.02em;
+  transition:background .18s,transform .1s;position:relative;overflow:hidden;
+}
+.run-btn:hover{background:var(--slate2)}
+.run-btn:active{transform:scale(.99)}
+.run-btn:disabled{background:var(--muted);cursor:not-allowed;transform:none}
+.run-btn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);
+  transform:translateX(-100%);transition:transform .4s;
+}
+.run-btn:hover:not(:disabled)::after{transform:translateX(100%)}
+
+/* ── Pipeline progress ───────────────────────────────────────────────── */
+.pipeline-bar{
+  display:flex;align-items:center;gap:0;
+  background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:16px 20px;margin-bottom:20px;box-shadow:var(--shadow);
+  overflow-x:auto;
+}
+.pipeline-step{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:72px}
+.pipeline-step-icon{
+  width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:14px;border:2px solid var(--border);
+  background:var(--paper2);color:var(--muted);transition:all .3s;
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+}
+.pipeline-step.done .pipeline-step-icon{background:var(--successBg);border-color:var(--success);color:var(--success)}
+.pipeline-step.running .pipeline-step-icon{background:var(--amber3);border-color:var(--amber);color:var(--amber);animation:pulse .8s ease infinite}
+.pipeline-step.error .pipeline-step-icon{background:var(--dangerBg);border-color:var(--danger);color:var(--danger)}
+.pipeline-step-label{font-size:9px;color:var(--muted);text-align:center;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em;line-height:1.3;max-width:70px}
+.pipeline-step.done .pipeline-step-label{color:var(--success)}
+.pipeline-step.running .pipeline-step-label{color:var(--amber)}
+.pipeline-connector{flex:1;height:1px;background:var(--border);min-width:12px;margin:0 4px;margin-bottom:20px}
+.pipeline-connector.done{background:var(--success)}
+
+/* ── Agent result cards ──────────────────────────────────────────────── */
+.result-section{margin-bottom:20px;animation:fadeUp .4s ease both}
+.result-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.result-card-header{
+  padding:13px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.result-card-header-left{display:flex;align-items:center;gap:10px}
+.agent-badge{
+  width:30px;height:30px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:13px;flex-shrink:0;border:1.5px solid;
+}
+.result-card-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--ink)}
+.result-card-subtitle{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.result-card-body{padding:18px;font-size:14px;line-height:1.75;color:var(--ink)}
+
+/* loading skeleton */
+.skeleton{
+  background:linear-gradient(90deg,var(--paper2) 25%,var(--paper) 50%,var(--paper2) 75%);
+  background-size:400% 100%;animation:shimmer 1.4s ease infinite;
+  border-radius:4px;height:14px;margin-bottom:10px;
+}
+.skeleton.w80{width:80%}.skeleton.w60{width:60%}.skeleton.w90{width:90%}.skeleton.w70{width:70%}
+
+/* ── Paper sections inside cards ─────────────────────────────────────── */
+.section-label{
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:8px;
+}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.prose p{margin-bottom:12px;color:var(--ink);line-height:1.75}
+.prose p:last-child{margin-bottom:0}
+.prose ul{padding-left:18px;margin-bottom:12px}
+.prose li{margin-bottom:6px;line-height:1.65}
+.prose strong{font-weight:700;color:var(--slate)}
+.prose em{font-style:italic;color:var(--slate3)}
+
+/* citation chip */
+.cite{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;font-family:'JetBrains Mono',monospace;
+  background:var(--amber3);border:1px solid rgba(196,120,58,.25);
+  color:var(--amber);border-radius:4px;padding:1px 6px;
+  cursor:pointer;transition:background .15s;vertical-align:middle;
+}
+.cite:hover{background:rgba(196,120,58,.22)}
+
+/* paper cards within results */
+.paper-card{
+  background:var(--paper);border:1px solid var(--border);border-radius:var(--rs);
+  padding:13px 15px;margin-bottom:10px;cursor:pointer;transition:border-color .15s,box-shadow .15s;
+}
+.paper-card:hover{border-color:var(--amber);box-shadow:0 2px 8px var(--amber3)}
+.paper-card:last-child{margin-bottom:0}
+.paper-title{font-size:13px;font-weight:700;color:var(--slate);margin-bottom:3px;line-height:1.4}
+.paper-meta{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:6px}
+.paper-abstract{font-size:12px;color:var(--slate3);line-height:1.6}
+.paper-relevance{
+  display:inline-flex;align-items:center;gap:4px;font-size:10px;
+  font-family:'JetBrains Mono',monospace;padding:2px 7px;border-radius:10px;
+  margin-top:6px;font-weight:500;
+}
+.rel-high{background:var(--successBg);color:var(--success)}
+.rel-med{background:var(--amber3);color:var(--amber)}
+
+/* recommendation row */
+.rec-row{
+  display:flex;gap:12px;padding:12px 0;
+  border-bottom:1px solid var(--border);align-items:flex-start;
+}
+.rec-row:last-child{border-bottom:none}
+.rec-num{
+  width:22px;height:22px;border-radius:50%;background:var(--slate);color:#F5F0E8;
+  font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:2px;font-family:'JetBrains Mono',monospace;
+}
+.rec-text{flex:1;font-size:13px;line-height:1.65;color:var(--ink)}
+.rec-confidence{
+  font-size:10px;font-family:'JetBrains Mono',monospace;
+  padding:2px 7px;border-radius:10px;flex-shrink:0;
+}
+.conf-high{background:var(--successBg);color:var(--success)}
+.conf-med{background:var(--amber3);color:var(--amber)}
+.conf-low{background:var(--dangerBg);color:var(--danger)}
+
+/* for/against table */
+.verdict-table{width:100%;border-collapse:collapse;font-size:13px}
+.verdict-table th{padding:10px 14px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:2px solid var(--border);font-weight:700;font-family:'JetBrains Mono',monospace}
+.verdict-table td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.6}
+.verdict-table tr:last-child td{border-bottom:none}
+.for-cell{color:var(--success);background:var(--successBg)}
+.against-cell{color:var(--danger);background:var(--dangerBg)}
+.verdict-icon{font-size:12px;margin-right:4px}
+
+/* judge verdict box */
+.judge-verdict{
+  background:var(--slate);border-radius:var(--rs);padding:16px 18px;margin-top:14px;
+}
+.judge-verdict-label{font-size:10px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:rgba(245,240,232,.4);margin-bottom:6px}
+.judge-verdict-text{font-family:'Playfair Display',serif;font-size:15px;color:#F5F0E8;line-height:1.6;font-style:italic}
+.judge-proceed{
+  display:inline-flex;align-items:center;gap:6px;margin-top:10px;
+  padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;
+  font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em;
+}
+.proceed-yes{background:var(--successBg);color:var(--success);border:1px solid rgba(58,122,74,.3)}
+.proceed-caution{background:var(--amber3);color:var(--amber);border:1px solid rgba(196,120,58,.3)}
+.proceed-revise{background:var(--dangerBg);color:var(--danger);border:1px solid rgba(176,64,64,.3)}
+
+/* devil panel */
+.devil-btn{
+  display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:var(--rs);
+  background:var(--dangerBg);border:1px solid rgba(176,64,64,.25);color:var(--danger);
+  font-size:13px;font-weight:700;transition:all .15s;font-family:'Lato',sans-serif;
+}
+.devil-btn:hover{background:rgba(176,64,64,.18);border-color:rgba(176,64,64,.4)}
+.devil-btn.active{background:var(--danger);color:#fff}
+
+/* risk banner */
+.risk-banner{
+  display:flex;align-items:flex-start;gap:12px;padding:14px 16px;
+  background:var(--dangerBg);border:1px solid rgba(176,64,64,.3);
+  border-radius:var(--rs);margin-bottom:16px;
+}
+.risk-icon{font-size:20px;flex-shrink:0;margin-top:1px}
+.risk-title{font-size:13px;font-weight:700;color:var(--danger);margin-bottom:3px}
+.risk-text{font-size:12px;color:var(--ink);line-height:1.6}
+
+/* bonus agents row */
+.bonus-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.bonus-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  box-shadow:var(--shadow);overflow:hidden;
+}
+.bonus-card-header{padding:11px 15px;background:var(--paper2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.bonus-card-title{font-size:13px;font-weight:700;color:var(--ink);font-family:'Playfair Display',serif}
+.bonus-card-body{padding:14px 15px;font-size:13px;color:var(--ink);line-height:1.65}
+
+/* memo */
+.memo-box{
+  background:var(--paper);border:1px solid var(--border);border-radius:var(--rs);
+  padding:16px;font-size:13px;line-height:1.8;color:var(--ink);white-space:pre-wrap;
+  font-family:'Lato',sans-serif;
 }
 
-.brand { text-align: center; margin-bottom: 40px; }
-.brand-name { font-size: 24px; font-weight: 700; letter-spacing: -0.8px; }
-.brand-tag { font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--sf-text-sec); margin-top: 4px; letter-spacing: 1px; }
-
-.nav-item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 16px; border-radius: 12px;
-  color: var(--sf-text); text-decoration: none;
-  font-size: 14px; font-weight: 500; border: none;
-  background: transparent; width: 100%; cursor: pointer;
-  transition: all 0.2s; margin-bottom: 4px; text-align: left;
+/* ── Toast ───────────────────────────────────────────────────────────── */
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.toast{
+  padding:10px 14px;border-radius:var(--rs);font-size:13px;min-width:200px;
+  border:1px solid;animation:fadeUp .25s ease;pointer-events:none;background:#fff;
 }
-.nav-item:hover { background: rgba(0, 0, 0, 0.04); }
-.nav-item.active { background: var(--sf-accent); color: white; }
+.toast.success{border-color:rgba(58,122,74,.3);color:var(--success)}
+.toast.error{border-color:rgba(176,64,64,.3);color:var(--danger)}
+.toast.info{border-color:rgba(196,120,58,.3);color:var(--amber)}
 
-.main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; scroll-behavior: smooth; }
-.content-width { width: 100%; max-width: 840px; padding: 60px 40px; }
-
-/* ── Components ────────────────────────────────────────────────────── */
-header { margin-bottom: 48px; }
-header h1 { font-size: 40px; font-weight: 700; letter-spacing: -1.2px; margin-bottom: 8px; }
-header p { color: var(--sf-text-sec); font-size: 19px; }
-
-.glass-card {
-  background: var(--sf-card);
-  backdrop-filter: var(--blur);
-  border: 1px solid var(--sf-border);
-  border-radius: var(--radius);
-  padding: 32px;
-  box-shadow: var(--shadow);
-  margin-bottom: 24px;
+/* ── Settings page ───────────────────────────────────────────────────── */
+.settings-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:22px;margin-bottom:14px}
+.settings-card h3{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;margin-bottom:4px}
+.settings-card p{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6}
+.api-key-row{display:flex;gap:8px}
+.api-key-input{
+  flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:var(--rs);
+  background:var(--paper);color:var(--ink);font-size:13px;
+  font-family:'JetBrains Mono',monospace;outline:none;transition:border-color .2s;
 }
-
-.label { font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--sf-text-sec); margin-bottom: 8px; display: block; letter-spacing: 0.5px; }
-
-.sf-input, .sf-textarea, .sf-select {
-  width: 100%; background: rgba(0, 0, 0, 0.04);
-  border: 1px solid transparent; border-radius: 12px;
-  padding: 14px; font-family: inherit; font-size: 15px;
-  transition: all 0.2s; margin-bottom: 20px; color: var(--sf-text);
+.api-key-input:focus{border-color:var(--amber)}
+.btn-save{
+  padding:10px 18px;border:none;border-radius:var(--rs);background:var(--slate);
+  color:#F5F0E8;font-size:13px;font-weight:700;transition:background .15s;
+  font-family:'Lato',sans-serif;
 }
-.sf-input:focus, .sf-textarea:focus { outline: none; background: #fff; border-color: var(--sf-accent); box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1); }
-
-.primary-btn {
-  background: var(--sf-accent); color: white; border: none;
-  padding: 16px 32px; border-radius: 30px;
-  font-size: 17px; font-weight: 600; cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); width: 100%;
+.btn-save:hover{background:var(--slate2)}
+.note-box{
+  background:var(--paper2);border:1px solid var(--border);border-radius:var(--rs);
+  padding:12px 14px;font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px;
 }
-.primary-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(0, 122, 255, 0.25); }
-.primary-btn:active { transform: scale(0.98); }
-.primary-btn:disabled { background: var(--sf-text-sec); opacity: 0.5; cursor: not-allowed; }
+.note-box strong{color:var(--ink)}
 
-/* ── Pipeline ── */
-.pipeline { display: flex; justify-content: space-between; margin-bottom: 48px; position: relative; }
-.step { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
-.step-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--sf-border); transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-.step.active .step-dot { background: var(--sf-accent); box-shadow: 0 0 12px var(--sf-accent); transform: scale(1.2); }
-.step.done .step-dot { background: var(--sf-success); }
-.step-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--sf-text-sec); }
-
-/* ── Results Logic UI ── */
-.agent-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-.agent-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-.agent-name { font-weight: 600; font-size: 18px; letter-spacing: -0.3px; }
-
-.prose p { margin-bottom: 16px; color: var(--sf-text); line-height: 1.6; }
-.cite { display: inline-flex; background: rgba(0,122,255,0.1); color: var(--sf-accent); padding: 1px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; margin: 0 2px; }
-
-/* Table and Records */
-.verdict-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 20px 0; background: rgba(0,0,0,0.02); border-radius: 12px; overflow: hidden; }
-.verdict-table th { text-align: left; color: var(--sf-text-sec); padding: 12px; border-bottom: 1px solid var(--sf-border); font-weight: 600; text-transform: uppercase; font-size: 10px; }
-.verdict-table td { padding: 14px 12px; border-bottom: 1px solid var(--sf-border); vertical-align: top; }
-.for-cell { color: var(--sf-success); font-weight: 500; }
-.against-cell { color: var(--sf-danger); font-weight: 500; }
-
-.memo-box { background: #fff; border: 1px solid var(--sf-border); padding: 20px; border-radius: 12px; font-size: 14px; font-family: inherit; white-space: pre-wrap; color: var(--sf-text); }
-
-/* Recommendation Rows */
-.rec-row { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--sf-border); }
-.rec-num { width: 24px; height: 24px; background: var(--sf-text); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
-.conf-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; height: fit-content; }
-.conf-HIGH { background: rgba(52,199,89,0.1); color: var(--sf-success); }
-.conf-MEDIUM { background: rgba(255,149,0,0.1); color: #FF9500; }
-.conf-LOW { background: rgba(255,59,48,0.1); color: var(--sf-danger); }
-
-/* Paper Cards */
-.paper-card { background: rgba(0,0,0,0.02); padding: 16px; border-radius: 14px; margin-bottom: 12px; border: 1px solid transparent; transition: 0.2s; }
-.paper-card:hover { border-color: var(--sf-accent); background: #fff; }
-.paper-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
-.paper-meta { font-size: 11px; color: var(--sf-text-sec); font-weight: 500; }
-
-/* Status Toast */
-#toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
-.toast { background: rgba(29,29,31,0.9); color: #fff; padding: 12px 24px; border-radius: 25px; font-size: 14px; font-weight: 500; backdrop-filter: blur(10px); animation: slideUp 0.4s ease forwards; }
-
-@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-.hidden { display: none !important; }
-
-/* Skeleton */
-.skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; height: 14px; border-radius: 4px; margin-bottom: 10px; }
-@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
+/* ── Responsive ─────────────────────────────────────────────────────── */
+@media(max-width:768px){
+  .sidebar{width:180px}
+  .content{padding:16px}
+  .form-row{grid-template-columns:1fr}
+  .bonus-grid{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .sidebar{display:none}
+  .content{padding:12px}
+}
 </style>
 </head>
 <body>
-
 <div class="app">
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-name">Perspective</div>
-      <div class="brand-tag">Clinical Intelligence</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════════════════════════ -->
+<div class="sidebar">
+  <div class="sidebar-top">
+    <div class="sidebar-logo">Perspective <span>AI</span></div>
+    <div class="sidebar-tagline">Clinical Intelligence</div>
+  </div>
+  <div class="sidebar-divider"></div>
+  <nav class="sidebar-nav">
+    <button class="nav-item active" data-page="input" onclick="goTo('input')">
+      <span class="nav-icon">✍</span> New Session
+    </button>
+    <button class="nav-item" data-page="results" onclick="goTo('results')">
+      <span class="nav-icon">🔬</span> Analysis
+    </button>
+    <button class="nav-item" data-page="history" onclick="goTo('history')">
+      <span class="nav-icon">📚</span> Session History
+    </button>
+    <button class="nav-item" data-page="settings" onclick="goTo('settings')">
+      <span class="nav-icon">⚙</span> Settings
+    </button>
+  </nav>
+  <div class="sidebar-session-info">
+    <div class="session-status" id="session-status">
+      <div class="session-dot" id="session-dot"></div>
+      <span id="session-status-text">No session active</span>
     </div>
-    
-    <nav>
-      <button class="nav-item active" data-page="input" onclick="goTo('input')">⊕ New Session</button>
-      <button class="nav-item" data-page="results" onclick="goTo('results')">◈ Analysis</button>
-      <button class="nav-item" data-page="history" onclick="goTo('history')">◎ History</button>
-      <button class="nav-item" data-page="settings" onclick="goTo('settings')">⚙ Settings</button>
-    </nav>
-    
-    <div style="margin-top: auto; padding: 16px; background: rgba(0,0,0,0.03); border-radius: 16px; font-size: 11px;">
-      <div id="api-status" style="display: flex; align-items: center; gap: 6px; font-weight: 600;">
-        <div id="api-dot" style="width:6px; height:6px; border-radius:50%; background: var(--sf-danger);"></div>
-        <span id="api-status-text">Key Missing</span>
-      </div>
-      <div id="session-status" style="margin-top: 6px; color: var(--sf-text-sec); font-weight: 500;">System Idle</div>
-    </div>
-  </aside>
-
-  <main class="main">
-    <!-- PAGE: INPUT -->
-    <div id="page-input" class="content-width">
-      <header>
-        <h1>Session Notes.</h1>
-        <p>Intelligence that understands the nuance of therapy.</p>
-      </header>
-
-      <div id="risk-banner" class="hidden" style="background: rgba(255,59,48,0.1); border: 1px solid rgba(255,59,48,0.2); color: var(--sf-danger); padding: 16px; border-radius: 14px; margin-bottom: 24px; font-size: 14px; font-weight: 600;">
-        ⚠️ Risk Language Detected. Review protocols immediately.
-      </div>
-
-      <div class="glass-card">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-          <div>
-            <label class="label">Patient Identifier</label>
-            <input type="text" id="patient-id" class="sf-input" placeholder="e.g. Apollo-12">
-          </div>
-          <div>
-            <label class="label">Session Number</label>
-            <input type="text" id="session-num" class="sf-input" placeholder="e.g. 05">
-          </div>
-        </div>
-
-        <label class="label">Primary Modality</label>
-        <select id="modality" class="sf-select">
-          <option value="CBT">CBT (Cognitive Behavioral)</option>
-          <option value="DBT">DBT (Dialectical)</option>
-          <option value="ACT">ACT (Acceptance & Commitment)</option>
-          <option value="Psychodynamic">Psychodynamic</option>
-          <option value="Somatic">Somatic</option>
-          <option value="Integrative">Integrative</option>
-        </select>
-
-        <label class="label">The Notes</label>
-        <textarea id="session-notes" class="sf-textarea" style="min-height: 240px;" placeholder="Write or paste your post-session notes here..." oninput="checkRisk()"></textarea>
-
-        <label class="label">Previous Context (Optional)</label>
-        <textarea id="prev-context" class="sf-textarea" style="min-height: 80px;" placeholder="Medication, history, or past session themes..."></textarea>
-
-        <button class="primary-btn" id="run-btn" onclick="runPipeline()">Analyze Session</button>
-      </div>
-    </div>
-
-    <!-- PAGE: RESULTS -->
-    <div id="page-results" class="content-width hidden">
-      <header>
-        <h1 id="res-title">The Analysis.</h1>
-        <p id="res-subtitle">Synthesized clinical perspectives.</p>
-      </header>
-
-      <div class="pipeline">
-        <div class="step" id="pstep-risk"><div class="step-dot"></div><span class="step-label">Risk</span></div>
-        <div class="step" id="pstep-scout"><div class="step-dot"></div><span class="step-label">Scout</span></div>
-        <div class="step" id="pstep-analyst"><div class="step-dot"></div><span class="step-label">Analyst</span></div>
-        <div class="step" id="pstep-bonus"><div class="step-dot"></div><span class="step-label">Refining</span></div>
-        <div class="step" id="pstep-judge"><div class="step-dot"></div><span class="step-label">Judge</span></div>
-      </div>
-
-      <!-- Result Sections -->
-      <div id="section-scout" class="glass-card hidden">
-        <div class="agent-header">
-          <div class="agent-icon" style="background:rgba(0,122,255,0.1); color:var(--sf-accent);">🔍</div>
-          <div class="agent-name">Research Scout</div>
-        </div>
-        <div id="scout-body"></div>
-      </div>
-
-      <div id="section-analyst" class="glass-card hidden">
-        <div class="agent-header">
-          <div class="agent-icon" style="background:rgba(52,199,89,0.1); color:var(--sf-success);">🧠</div>
-          <div class="agent-name">Clinical Analyst</div>
-        </div>
-        <div id="analyst-body"></div>
-      </div>
-
-      <div id="section-bonus" class="hidden" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
-         <div class="glass-card" style="margin-bottom: 0;">
-            <label class="label">Reframer</label>
-            <div id="bonus-reframe" style="font-size: 13px;"></div>
-         </div>
-         <div class="glass-card" style="margin-bottom: 0;">
-            <label class="label">Progress Tracker</label>
-            <div id="bonus-progress" style="font-size: 13px;"></div>
-         </div>
-         <div class="glass-card" style="grid-column: span 2; margin-bottom: 0;">
-            <label class="label">Session Memo</label>
-            <div id="bonus-memo"></div>
-         </div>
-      </div>
-
-      <div style="text-align: center; margin: 30px 0;">
-        <button id="devil-btn" class="primary-btn hidden" style="width: auto; background: #1D1D1F; padding: 12px 24px;" onclick="runDevil()">Challenge Analysis 😈</button>
-      </div>
-
-      <div id="section-devil" class="glass-card hidden">
-        <div class="agent-header">
-          <div class="agent-icon" style="background:rgba(255,59,48,0.1); color:var(--sf-danger);">😈</div>
-          <div class="agent-name">Devil's Advocate</div>
-        </div>
-        <div id="devil-body"></div>
-      </div>
-
-      <div id="section-judge" class="glass-card hidden">
-        <div class="agent-header">
-          <div class="agent-icon" style="background:rgba(29,29,31,0.1); color:var(--sf-text);">⚖</div>
-          <div class="agent-name">The Judge</div>
-        </div>
-        <div id="judge-body"></div>
-      </div>
-    </div>
-
-    <!-- PAGE: HISTORY -->
-    <div id="page-history" class="content-width hidden">
-        <header><h1>Session History.</h1></header>
-        <div id="history-list"></div>
-    </div>
-
-    <!-- PAGE: SETTINGS -->
-    <div id="page-settings" class="content-width hidden">
-      <header><h1>Settings.</h1></header>
-      <div class="glass-card">
-        <label class="label">Anthropic API Key</label>
-        <input type="password" id="api-key-input" class="sf-input" placeholder="sk-ant-...">
-        <button class="primary-btn" onclick="saveApiKey()">Update Credentials</button>
-        <p style="font-size: 11px; color: var(--sf-text-sec); margin-top: 16px;">Key is stored locally in your browser cache.</p>
-      </div>
-    </main>
+  </div>
 </div>
 
-<div id="toast-container"></div>
+<!-- ══════════════════════════════════════════════════════════
+     MAIN
+══════════════════════════════════════════════════════════ -->
+<div class="main">
+  <!-- Top bar -->
+  <div class="topbar">
+    <div>
+      <span class="topbar-title" id="topbar-title">New Session</span>
+      <span class="topbar-subtitle" id="topbar-sub">· Post-session clinical analysis</span>
+    </div>
+    <div class="topbar-right">
+      <div class="api-status" id="api-status-badge">
+        <div class="api-dot" id="api-dot"></div>
+        <span id="api-status-text">API key not set</span>
+      </div>
+    </div>
+  </div>
 
+  <!-- ── Page: Input ─────────────────────────────────────── -->
+  <div class="content" id="page-input">
+    <div class="page-header anim-fade-up">
+      <h2>Post-Session Notes</h2>
+      <p>Enter your session notes below. The agent team will research, analyse, challenge, and synthesise — so you can focus on the patient.</p>
+    </div>
+
+    <!-- Risk notice (always visible) -->
+    <div id="risk-pre-banner" class="risk-banner hidden">
+      <div class="risk-icon">⚠️</div>
+      <div>
+        <div class="risk-title">Risk Language Detected</div>
+        <div class="risk-text" id="risk-pre-text">Potential indicators identified in your notes. Please review before proceeding.</div>
+      </div>
+    </div>
+
+    <div class="input-card anim-fade-up" style="animation-delay:.08s">
+      <div class="input-card-header">
+        <span>📋</span>
+        <h3>Session Notes</h3>
+      </div>
+      <div class="input-card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Patient ID / Pseudonym</label>
+            <input class="form-input" id="patient-id" type="text" placeholder="e.g. Patient A, or P-2024-07"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Session Number</label>
+            <input class="form-input" id="session-num" type="text" placeholder="e.g. Session 4"/>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label">Primary Therapeutic Modality</label>
+          <select class="form-select" id="modality">
+            <option value="">Not specified</option>
+            <option value="CBT">Cognitive Behavioural Therapy (CBT)</option>
+            <option value="DBT">Dialectical Behaviour Therapy (DBT)</option>
+            <option value="ACT">Acceptance & Commitment Therapy (ACT)</option>
+            <option value="psychodynamic">Psychodynamic</option>
+            <option value="attachment">Attachment-Based</option>
+            <option value="somatic">Somatic</option>
+            <option value="EMDR">EMDR</option>
+            <option value="narrative">Narrative Therapy</option>
+            <option value="integrative">Integrative / Eclectic</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label">Session Notes</label>
+          <textarea class="session-textarea" id="session-notes" placeholder="Write or paste your post-session notes here. Include presenting issues, patient's emotional state, themes that emerged, your own hypotheses, what worked and what didn't, and anything that felt unresolved..." oninput="onNotesInput()"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:18px">
+          <label class="form-label">Previous Context (optional)</label>
+          <textarea class="session-textarea" id="prev-context" style="min-height:80px" placeholder="Brief notes from previous sessions, known diagnoses, ongoing themes, medication..."></textarea>
+        </div>
+        <button class="run-btn" id="run-btn" onclick="runPipeline()">
+          Run Agent Analysis →
+        </button>
+      </div>
+    </div>
+
+    <div class="input-card anim-fade-up" style="animation-delay:.15s">
+      <div class="input-card-header">
+        <span>💡</span>
+        <h3>What the Agents Will Do</h3>
+      </div>
+      <div class="input-card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="padding:10px 12px;background:var(--paper);border:1px solid var(--border);border-radius:var(--rs)">
+            <div style="font-weight:700;font-size:12px;margin-bottom:3px;color:var(--slate)">🔍 Research Scout</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.5">Searches PubMed & Semantic Scholar for papers relevant to your session themes</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--paper);border:1px solid var(--border);border-radius:var(--rs)">
+            <div style="font-weight:700;font-size:12px;margin-bottom:3px;color:var(--slate)">🧠 Clinical Analyst</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.5">Synthesises research into evidence-based treatment directions and next-session plan</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--paper);border:1px solid var(--border);border-radius:var(--rs)">
+            <div style="font-weight:700;font-size:12px;margin-bottom:3px;color:var(--slate)">😈 Devil's Advocate</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.5">On demand — challenges the analyst's conclusions, surfaces risks and blind spots</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--paper);border:1px solid var(--border);border-radius:var(--rs)">
+            <div style="font-weight:700;font-size:12px;margin-bottom:3px;color:var(--slate)">⚖️ The Judge</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.5">Arbitrates both views, delivers a structured verdict and recommended path forward</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Page: Results ───────────────────────────────────── -->
+  <div class="content hidden" id="page-results">
+
+    <!-- Pipeline status bar -->
+    <div class="pipeline-bar" id="pipeline-bar">
+      <div class="pipeline-step" id="pstep-risk">
+        <div class="pipeline-step-icon">🛡</div>
+        <div class="pipeline-step-label">Risk check</div>
+      </div>
+      <div class="pipeline-connector" id="pconn-0"></div>
+      <div class="pipeline-step" id="pstep-scout">
+        <div class="pipeline-step-icon">🔍</div>
+        <div class="pipeline-step-label">Scout</div>
+      </div>
+      <div class="pipeline-connector" id="pconn-1"></div>
+      <div class="pipeline-step" id="pstep-analyst">
+        <div class="pipeline-step-icon">🧠</div>
+        <div class="pipeline-step-label">Analyst</div>
+      </div>
+      <div class="pipeline-connector" id="pconn-2"></div>
+      <div class="pipeline-step" id="pstep-bonus">
+        <div class="pipeline-step-icon">✨</div>
+        <div class="pipeline-step-label">Bonus</div>
+      </div>
+      <div class="pipeline-connector" id="pconn-3"></div>
+      <div class="pipeline-step" id="pstep-judge">
+        <div class="pipeline-step-icon">⚖</div>
+        <div class="pipeline-step-label">Judge</div>
+      </div>
+    </div>
+
+    <!-- Risk banner (results page) -->
+    <div id="risk-banner-results" class="risk-banner hidden">
+      <div class="risk-icon">⚠️</div>
+      <div>
+        <div class="risk-title">Risk Monitor — Flagged</div>
+        <div class="risk-text" id="risk-result-text"></div>
+      </div>
+    </div>
+
+    <!-- Research Scout results -->
+    <div class="result-section hidden" id="section-scout">
+      <div class="result-card">
+        <div class="result-card-header">
+          <div class="result-card-header-left">
+            <div class="agent-badge" style="background:rgba(196,120,58,.1);border-color:rgba(196,120,58,.3);color:var(--amber)">🔍</div>
+            <div>
+              <div class="result-card-title">Research Scout</div>
+              <div class="result-card-subtitle">Literature search · PubMed / Semantic Scholar</div>
+            </div>
+          </div>
+        </div>
+        <div class="result-card-body" id="scout-body"></div>
+      </div>
+    </div>
+
+    <!-- Clinical Analyst results -->
+    <div class="result-section hidden" id="section-analyst">
+      <div class="result-card">
+        <div class="result-card-header">
+          <div class="result-card-header-left">
+            <div class="agent-badge" style="background:rgba(58,90,122,.1);border-color:rgba(58,90,122,.3);color:var(--slate2)">🧠</div>
+            <div>
+              <div class="result-card-title">Clinical Analyst</div>
+              <div class="result-card-subtitle">Evidence synthesis · Treatment planning</div>
+            </div>
+          </div>
+        </div>
+        <div class="result-card-body" id="analyst-body"></div>
+      </div>
+    </div>
+
+    <!-- Bonus agents -->
+    <div class="bonus-grid hidden" id="section-bonus">
+      <div class="bonus-card">
+        <div class="bonus-card-header"><span>📈</span><span class="bonus-card-title">Progress Tracker</span></div>
+        <div class="bonus-card-body" id="bonus-progress"></div>
+      </div>
+      <div class="bonus-card">
+        <div class="bonus-card-header"><span>🔄</span><span class="bonus-card-title">Reframer</span></div>
+        <div class="bonus-card-body" id="bonus-reframe"></div>
+      </div>
+      <div class="bonus-card" style="grid-column:1/-1">
+        <div class="bonus-card-header"><span>📝</span><span class="bonus-card-title">Session Memo</span></div>
+        <div class="bonus-card-body" id="bonus-memo"></div>
+      </div>
+    </div>
+
+    <!-- Devil's Advocate (on demand) -->
+    <div class="result-section hidden" id="section-devil-trigger">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <button class="devil-btn" id="devil-btn" onclick="runDevil()">
+          <span>😈</span> Challenge This Analysis
+        </button>
+        <span style="font-size:12px;color:var(--muted)">Ask the Devil's Advocate to challenge the clinical analyst's conclusions</span>
+      </div>
+    </div>
+
+    <div class="result-section hidden" id="section-devil">
+      <div class="result-card">
+        <div class="result-card-header">
+          <div class="result-card-header-left">
+            <div class="agent-badge" style="background:var(--dangerBg);border-color:rgba(176,64,64,.3);color:var(--danger)">😈</div>
+            <div>
+              <div class="result-card-title">Devil's Advocate</div>
+              <div class="result-card-subtitle">Adversarial critique · On demand</div>
+            </div>
+          </div>
+        </div>
+        <div class="result-card-body" id="devil-body"></div>
+      </div>
+    </div>
+
+    <!-- Judge -->
+    <div class="result-section hidden" id="section-judge">
+      <div class="result-card">
+        <div class="result-card-header">
+          <div class="result-card-header-left">
+            <div class="agent-badge" style="background:rgba(44,51,64,.1);border-color:rgba(44,51,64,.3);color:var(--slate)">⚖</div>
+            <div>
+              <div class="result-card-title">The Judge</div>
+              <div class="result-card-subtitle">Arbitration · Final synthesis</div>
+            </div>
+          </div>
+          <button id="re-judge-btn" class="devil-btn hidden" style="background:rgba(44,51,64,.08);border-color:rgba(44,51,64,.2);color:var(--slate);font-size:12px;padding:6px 12px" onclick="runJudge()">Re-Judge</button>
+        </div>
+        <div class="result-card-body" id="judge-body"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Page: History ───────────────────────────────────── -->
+  <div class="content hidden" id="page-history">
+    <div class="page-header anim-fade-up">
+      <h2>Session History</h2>
+      <p>All sessions analysed in this browser session. Saved locally — not sent anywhere.</p>
+    </div>
+    <div id="history-list">
+      <div class="input-card">
+        <div class="input-card-body" style="text-align:center;padding:40px;color:var(--muted)">
+          <div style="font-size:32px;margin-bottom:12px;opacity:.4">📚</div>
+          <div style="font-size:14px">No sessions yet. Run an analysis to see history here.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Page: Settings ─────────────────────────────────── -->
+  <div class="content hidden" id="page-settings">
+    <div class="page-header anim-fade-up">
+      <h2>Settings</h2>
+      <p>Configure your API key and preferences.</p>
+    </div>
+
+    <div class="settings-card anim-fade-up">
+      <h3>Anthropic API Key</h3>
+      <p>Your API key is stored in <code>localStorage</code> in this browser only. It is never sent to any server other than Anthropic's API directly from your browser.</p>
+      <div class="api-key-row">
+        <input class="api-key-input" id="api-key-input" type="password" placeholder="sk-ant-api03-..."/>
+        <button class="btn-save" onclick="saveApiKey()">Save</button>
+      </div>
+      <div class="note-box">
+        <strong>Free tier:</strong> Anthropic gives $5 in free credits on signup — more than enough for hundreds of session analyses. Get your key at <strong>console.anthropic.com</strong>.
+        The model used is <code>claude-sonnet-4-20250514</code>.
+      </div>
+    </div>
+
+    <div class="settings-card anim-fade-up" style="animation-delay:.08s">
+      <h3>How it Works</h3>
+      <p>All Claude API calls are made directly from your browser — there is no intermediary server. Your session notes go from your browser to Anthropic's API and nowhere else. No data is stored externally.</p>
+      <div class="note-box" style="margin-top:0">
+        <strong>Research sources:</strong> The Research Scout uses the Semantic Scholar public API and PubMed E-utilities — both free, no key required. Papers are fetched in real time based on your session themes.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<div class="toast-wrap" id="toasts"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════════ -->
 <script>
-// ─── STATE & CONFIG ──────────────────────────────────────────────────
-const MODEL = "claude-3-5-sonnet-20240620";
+// ─── Config ──────────────────────────────────────────────────────────
+const MODEL = "claude-sonnet-4-20250514";
 let API_KEY = localStorage.getItem("sanby_api_key") || "";
+
+// ─── State ───────────────────────────────────────────────────────────
+let currentPage = "input";
 let sessionHistory = JSON.parse(localStorage.getItem("sanby_history") || "[]");
 let lastAnalystOutput = "";
 let lastScoutOutput = "";
 let lastNotesContext = "";
+let devilRan = false;
 let pipelineRunning = false;
 
-const RISK_TERMS = ["suicid", "self-harm", "hurt myself", "end my life", "overdose", "harm to others"];
+// ─── Boot ─────────────────────────────────────────────────────────────
+(function boot(){
+  updateApiStatus();
+  if(API_KEY) document.getElementById("api-key-input").value = API_KEY;
+  renderHistory();
+})();
 
-// ─── CORE LOGIC ──────────────────────────────────────────────────────
-
-function goTo(page) {
-  document.querySelectorAll(".content-width").forEach(el => el.classList.add("hidden"));
+// ─── Navigation ───────────────────────────────────────────────────────
+function goTo(page){
+  document.querySelectorAll(".content").forEach(el => el.classList.add("hidden"));
   document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
-  const target = document.getElementById("page-" + page);
-  target.classList.remove("hidden");
-  
-  // Animation reset
-  target.style.animation = 'none'; target.offsetHeight; target.style.animation = '';
+  document.getElementById("page-"+page).classList.remove("hidden");
   document.querySelector(`[data-page="${page}"]`).classList.add("active");
-  
-  if(page === 'history') renderHistory();
+  currentPage = page;
+
+  const titles = {
+    input:"New Session", results:"Analysis Results",
+    history:"Session History", settings:"Settings"
+  };
+  const subs = {
+    input:"· Post-session clinical analysis",
+    results:"· Multi-agent synthesis",
+    history:"· Past sessions",
+    settings:"· API configuration"
+  };
+  document.getElementById("topbar-title").textContent = titles[page] || page;
+  document.getElementById("topbar-sub").textContent = subs[page] || "";
 }
 
-function saveApiKey() {
+// ─── API key ──────────────────────────────────────────────────────────
+function saveApiKey(){
   const key = document.getElementById("api-key-input").value.trim();
-  if(!key) return showToast("Enter a valid key.");
+  if(!key){ showToast("Enter an API key first","error"); return; }
   API_KEY = key;
   localStorage.setItem("sanby_api_key", key);
-  updateApiUI();
-  showToast("Settings Saved.");
+  updateApiStatus();
+  showToast("API key saved","success");
 }
 
-function updateApiUI() {
-  const dot = document.getElementById("api-dot");
+function updateApiStatus(){
+  const dot  = document.getElementById("api-dot");
   const text = document.getElementById("api-status-text");
-  if(API_KEY.startsWith("sk-")) {
-    dot.style.background = "var(--sf-success)";
-    text.textContent = "API Connected";
+  if(API_KEY && API_KEY.startsWith("sk-")){
+    dot.className  = "api-dot ok";
+    text.textContent = "API connected";
   } else {
-    dot.style.background = "var(--sf-danger)";
-    text.textContent = "Key Missing";
+    dot.className  = "api-dot err";
+    text.textContent = "API key not set";
   }
 }
 
-function checkRisk() {
+// ─── Risk scanner (runs instantly on notes change) ────────────────────
+const RISK_TERMS = [
+  "suicid","self-harm","self harm","hurt myself","end my life",
+  "don't want to live","don't want to be here","harm to others",
+  "hurt someone","kill","overdose","cutting","burning myself"
+];
+
+function onNotesInput(){
   const notes = document.getElementById("session-notes").value.toLowerCase();
-  const found = RISK_TERMS.some(t => notes.includes(t));
-  document.getElementById("risk-banner").classList.toggle("hidden", !found);
+  const found = RISK_TERMS.filter(t => notes.includes(t));
+  const banner = document.getElementById("risk-pre-banner");
+  if(found.length){
+    document.getElementById("risk-pre-text").textContent =
+      `Detected indicators: ${found.slice(0,3).join(", ")}. This session may require immediate risk assessment protocols.`;
+    banner.classList.remove("hidden");
+  } else {
+    banner.classList.add("hidden");
+  }
 }
 
-// ─── EXTERNAL APIs ───────────────────────────────────────────────────
+// ─── Claude API call ─────────────────────────────────────────────────
+async function callClaude(systemPrompt, userMessage, maxTokens=1500){
+  if(!API_KEY){ throw new Error("No API key configured. Go to Settings."); }
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "x-api-key": API_KEY,
+      "anthropic-version":"2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: maxTokens,
+      system: systemPrompt,
+      messages:[{ role:"user", content: userMessage }]
+    })
+  });
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    throw new Error(err.error?.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  return data.content?.[0]?.text || "";
+}
 
-async function searchSemanticScholar(query) {
+// ─── Research Scout (Semantic Scholar + PubMed) ───────────────────────
+async function searchSemanticScholar(query, limit=5){
   try {
-    const res = await fetch(`https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&limit=4&fields=title,authors,year,abstract`);
+    const q = encodeURIComponent(query);
+    const res = await fetch(`https://api.semanticscholar.org/graph/v1/paper/search?query=${q}&limit=${limit}&fields=title,authors,year,abstract,externalIds`);
+    if(!res.ok) return [];
     const data = await res.json();
     return (data.data || []).map(p => ({
-      title: p.title, authors: (p.authors||[]).slice(0,2).map(a=>a.name).join(", "),
-      year: p.year, abstract: p.abstract ? p.abstract.slice(0,200)+"..." : "No abstract available."
+      title: p.title,
+      authors: (p.authors||[]).slice(0,2).map(a=>a.name).join(", "),
+      year: p.year,
+      abstract: p.abstract ? p.abstract.slice(0,280)+"…" : "Abstract not available.",
+      doi: p.externalIds?.DOI || "",
+      source: "Semantic Scholar"
     }));
   } catch { return []; }
 }
 
-async function searchPubMed(query) {
+async function searchPubMed(query, limit=4){
   try {
-    const sRes = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(query)}&retmax=3&retmode=json`);
-    const sData = await sRes.json();
-    const ids = sData.esearchresult.idlist;
+    const q = encodeURIComponent(query);
+    const searchRes = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${q}&retmax=${limit}&retmode=json`);
+    if(!searchRes.ok) return [];
+    const searchData = await searchRes.json();
+    const ids = searchData.esearchresult?.idlist || [];
     if(!ids.length) return [];
-    const sumRes = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${ids.join(",")}&retmode=json`);
-    const sumData = await sumRes.json();
-    return ids.map(id => ({
-      title: sumData.result[id].title, authors: sumData.result[id].authors[0].name,
-      year: sumData.result[id].pubdate.slice(0,4), abstract: "Research study from PubMed database."
-    }));
+    const summaryRes = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${ids.join(",")}&retmode=json`);
+    if(!summaryRes.ok) return [];
+    const summaryData = await summaryRes.json();
+    return ids.map(id => {
+      const doc = summaryData.result?.[id];
+      if(!doc) return null;
+      return {
+        title: doc.title || "Untitled",
+        authors: (doc.authors||[]).slice(0,2).map(a=>a.name).join(", "),
+        year: doc.pubdate?.slice(0,4) || "",
+        abstract: "See PubMed for full abstract.",
+        doi: "",
+        pmid: id,
+        source: "PubMed"
+      };
+    }).filter(Boolean);
   } catch { return []; }
 }
 
-async function callClaude(system, user) {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json", "x-api-key": API_KEY,
-      "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true"
-    },
-    body: JSON.stringify({ model: MODEL, max_tokens: 1500, system, messages: [{role:"user", content:user}] })
-  });
-  if(!res.ok) throw new Error("API Error");
-  const data = await res.json();
-  return data.content[0].text;
+// ─── Pipeline steps ───────────────────────────────────────────────────
+function setPipelineStep(stepId, status){
+  const el = document.getElementById("pstep-"+stepId);
+  if(!el) return;
+  el.className = "pipeline-step " + status;
+}
+function setPipelineConnector(idx, done){
+  const el = document.getElementById("pconn-"+idx);
+  if(el) el.className = "pipeline-connector" + (done?" done":"");
 }
 
-// ─── PIPELINE ────────────────────────────────────────────────────────
+function setSessionStatus(text, active=false, warning=false){
+  document.getElementById("session-status-text").textContent = text;
+  const dot = document.getElementById("session-dot");
+  dot.className = "session-dot" + (active?" active":"") + (warning?" warning":"");
+}
 
-async function runPipeline() {
-  const notes = document.getElementById("session-notes").value.trim();
-  if(!API_KEY) return goTo('settings');
-  if(!notes) return showToast("Enter session notes.");
-  if(pipelineRunning) return;
+// ─── Loading skeleton ─────────────────────────────────────────────────
+function skeletonHTML(){
+  return `
+    <div class="skeleton w90"></div><div class="skeleton w70"></div>
+    <div class="skeleton w80"></div><div class="skeleton w60"></div>
+    <div class="skeleton w90"></div><div class="skeleton w75"></div>`;
+}
+
+// ─── Main pipeline ────────────────────────────────────────────────────
+async function runPipeline(){
+  const notes    = document.getElementById("session-notes").value.trim();
+  const patientId= document.getElementById("patient-id").value.trim() || "Anonymous";
+  const sessionN = document.getElementById("session-num").value.trim() || "Unknown";
+  const modality = document.getElementById("modality").value;
+  const prevCtx  = document.getElementById("prev-context").value.trim();
+
+  if(!notes){ showToast("Please enter session notes first","error"); return; }
+  if(!API_KEY || !API_KEY.startsWith("sk-")){
+    showToast("Set your API key in Settings first","error");
+    goTo("settings"); return;
+  }
+  if(pipelineRunning){ showToast("Pipeline already running","info"); return; }
 
   pipelineRunning = true;
-  goTo('results');
-  document.getElementById("run-btn").disabled = true;
-  document.getElementById("session-status").textContent = "Analyzing...";
+  devilRan = false;
+  lastNotesContext = `Patient: ${patientId}\nSession: ${sessionN}\nModality: ${modality||"Not specified"}\nNotes:\n${notes}\n\nPrevious context:\n${prevCtx||"None provided"}`;
 
   // Reset UI
-  document.querySelectorAll(".step").forEach(s => s.classList.remove("active", "done"));
-  ["section-scout", "section-analyst", "section-bonus", "section-judge", "section-devil", "devil-btn"].forEach(id => document.getElementById(id).classList.add("hidden"));
+  ["section-scout","section-analyst","section-bonus","section-devil-trigger","section-devil","section-judge","risk-banner-results"].forEach(id=>{
+    document.getElementById(id).classList.add("hidden");
+  });
+  document.getElementById("re-judge-btn").classList.add("hidden");
+  document.getElementById("devil-btn").classList.remove("active");
+  ["risk","scout","analyst","bonus","judge"].forEach(s=>setPipelineStep(s,""));
+  [0,1,2,3].forEach(i=>setPipelineConnector(i,false));
+
+  goTo("results");
+  setSessionStatus("Running…", true);
+  document.getElementById("run-btn").disabled = true;
 
   try {
-    // 0. Risk
-    setStep('risk', 'active');
-    await new Promise(r => setTimeout(r, 500)); // UI feel
-    setStep('risk', 'done');
 
-    // 1. Research Scout
-    setStep('scout', 'active');
+    // ── STEP 0: Risk Monitor ─────────────────────────────────────────
+    setPipelineStep("risk","running");
+    const riskFound = RISK_TERMS.filter(t => notes.toLowerCase().includes(t));
+    if(riskFound.length){
+      const riskBanner = document.getElementById("risk-banner-results");
+      document.getElementById("risk-result-text").textContent =
+        `Risk-related language detected: "${riskFound[0]}". Immediate clinical risk assessment protocols should be considered before planning the next session. This flag was generated by keyword detection, not clinical judgment.`;
+      riskBanner.classList.remove("hidden");
+      setSessionStatus("Risk flagged — review required", false, true);
+    }
+    setPipelineStep("risk","done");
+    setPipelineConnector(0,true);
+
+    // ── STEP 1: Research Scout ───────────────────────────────────────
+    setPipelineStep("scout","running");
     document.getElementById("section-scout").classList.remove("hidden");
-    document.getElementById("scout-body").innerHTML = `<div class="skeleton"></div><div class="skeleton"></div>`;
-    
-    const queriesRaw = await callClaude("Extract 2 academic search queries from these notes. Return ONLY a JSON array of strings.", notes);
-    let queries = ["Psychotherapy evidence"];
-    try { queries = JSON.parse(queriesRaw); } catch(e) {}
-    
-    const papers = await Promise.all([searchSemanticScholar(queries[0]), searchPubMed(queries[1] || queries[0])]);
-    const allPapers = papers.flat().slice(0,6);
-    lastScoutOutput = allPapers.map((p,i) => `[${i+1}] ${p.title} (${p.year})`).join("\n");
-    
-    document.getElementById("scout-body").innerHTML = allPapers.map(p => `
-      <div class="paper-card">
-        <div class="paper-title">${p.title}</div>
-        <div class="paper-meta">${p.authors} · ${p.year}</div>
-      </div>
-    `).join("") || "No external papers found.";
-    setStep('scout', 'done');
+    document.getElementById("scout-body").innerHTML = skeletonHTML();
 
-    // 2. Analyst
-    setStep('analyst', 'active');
-    document.getElementById("section-analyst").classList.remove("hidden");
-    document.getElementById("analyst-body").innerHTML = `<div class="skeleton"></div><div class="skeleton" style="width:60%"></div>`;
-    
-    const analystPrompt = `Synthesize evidence. Rules: Reference papers by [num]. Structure: THEMES, SYNTHESIS, RECOMMENDATIONS (Confidence: HIGH/MED/LOW), AGENDA.`;
-    const analystInput = `NOTES: ${notes}\nRESEARCH: ${lastScoutOutput}`;
-    lastAnalystOutput = await callClaude(analystPrompt, analystInput);
-    renderAnalyst(lastAnalystOutput);
-    setStep('analyst', 'done');
+    // Extract keywords with Claude first
+    const keywordsRaw = await callClaude(
+      "You are a clinical research assistant. Extract 2 concise PubMed/academic search queries from these therapy session notes. Return ONLY a JSON array of 2 strings, nothing else. Example: [\"CBT rumination depression\",\"emotion regulation DBT\"]",
+      notes, 300
+    );
+    let queries = [];
+    try { queries = JSON.parse(keywordsRaw.trim()); } catch { queries = ["therapy session " + modality, "psychotherapy evidence based"]; }
 
-    // 3. Bonus Agents
-    setStep('bonus', 'active');
-    document.getElementById("section-bonus").classList.remove("hidden");
-    const [prog, refr, memo] = await Promise.all([
-      callClaude("Describe clinical trajectory in 3 sentences.", notes),
-      callClaude("Provide 3 reframes: CBT, Attachment, Somatic. Format as label: text", notes),
-      callClaude("Write a professional session memo for records.", notes)
+    // Fetch papers
+    const [ssResults, pubmedResults] = await Promise.all([
+      searchSemanticScholar(queries[0] || "psychotherapy evidence", 5),
+      searchPubMed(queries[1] || queries[0] || "mental health treatment", 3)
     ]);
-    document.getElementById("bonus-progress").textContent = prog;
-    document.getElementById("bonus-reframe").textContent = refr;
-    document.getElementById("bonus-memo").innerHTML = `<div class="memo-box">${memo}</div>`;
-    setStep('bonus', 'done');
+    const allPapers = [...ssResults, ...pubmedResults].slice(0,7);
+    lastScoutOutput = allPapers.map((p,i)=>`[${i+1}] ${p.title} (${p.authors}, ${p.year}). ${p.abstract}`).join("\n\n");
 
-    // 4. Judge
-    setStep('judge', 'active');
+    // Render papers
+    if(allPapers.length){
+      document.getElementById("scout-body").innerHTML =
+        `<div class="section-label">Found ${allPapers.length} relevant papers</div>` +
+        allPapers.map((p,i) => `
+          <div class="paper-card">
+            <div class="paper-title">${p.title}</div>
+            <div class="paper-meta">${[p.authors,p.year,p.source].filter(Boolean).join(" · ")}</div>
+            <div class="paper-abstract">${p.abstract}</div>
+            <span class="paper-relevance ${i<3?"rel-high":"rel-med"}">${i<3?"High relevance":"Moderate relevance"}</span>
+          </div>`).join("");
+    } else {
+      document.getElementById("scout-body").innerHTML = `<div style="color:var(--muted);font-size:13px;font-style:italic">No papers retrieved from external APIs. The Clinical Analyst will proceed based on clinical knowledge.</div>`;
+    }
+    setPipelineStep("scout","done");
+    setPipelineConnector(1,true);
+
+    // ── STEP 2: Clinical Analyst ──────────────────────────────────────
+    setPipelineStep("analyst","running");
+    document.getElementById("section-analyst").classList.remove("hidden");
+    document.getElementById("analyst-body").innerHTML = skeletonHTML();
+
+    const analystPrompt = `You are an experienced clinical psychologist acting as a supervisor. You have been given session notes from a therapist and a set of relevant research papers. Your job is to synthesise the evidence into actionable clinical guidance.
+
+CRITICAL RULES:
+- Every recommendation must reference at least one paper by number e.g. [1], [2]
+- Be specific, not generic
+- Structure your output EXACTLY as shown below
+- Do not invent papers — only reference what's provided
+- Confidence: HIGH = strong evidence, MEDIUM = moderate evidence, LOW = limited evidence
+
+OUTPUT FORMAT (use exactly these headings, plain text, no markdown asterisks):
+
+PRESENTING THEMES
+[2-3 sentences identifying the core clinical themes]
+
+EVIDENCE SYNTHESIS
+[2-3 paragraphs synthesising what the research says about these themes]
+
+RECOMMENDATIONS
+1. [Specific recommendation] [paper ref] — Confidence: HIGH/MEDIUM/LOW
+2. [Specific recommendation] [paper ref] — Confidence: HIGH/MEDIUM/LOW
+3. [Specific recommendation] [paper ref] — Confidence: HIGH/MEDIUM/LOW
+4. [Specific recommendation] [paper ref] — Confidence: HIGH/MEDIUM/LOW
+
+NEXT SESSION AGENDA
+[3-4 specific agenda items for the next session]
+
+SUGGESTED ASSESSMENT TOOLS
+[1-2 specific validated tools relevant to this presentation]`;
+
+    const analystInput = `SESSION CONTEXT:\n${lastNotesContext}\n\nRESEARCH PAPERS:\n${lastScoutOutput || "No external papers retrieved — rely on clinical evidence base."}`;
+    lastAnalystOutput = await callClaude(analystPrompt, analystInput, 1500);
+    renderAnalyst(lastAnalystOutput);
+
+    setPipelineStep("analyst","done");
+    setPipelineConnector(2,true);
+
+    // ── STEP 3: Bonus agents (parallel) ──────────────────────────────
+    setPipelineStep("bonus","running");
+    document.getElementById("section-bonus").classList.remove("hidden");
+    document.getElementById("bonus-progress").innerHTML = skeletonHTML();
+    document.getElementById("bonus-reframe").innerHTML = skeletonHTML();
+    document.getElementById("bonus-memo").innerHTML = skeletonHTML();
+
+    const [progressOut, reframeOut, memoOut] = await Promise.all([
+      callClaude(
+        "You are a clinical progress tracker. Based on the session notes, give a concise 3-4 sentence observation about the patient's trajectory — are themes shifting, deepening, or resolving? Note any patterns vs previous context. Be specific and clinical.",
+        lastNotesContext, 400
+      ),
+      callClaude(
+        "You are a clinical reframer. Given these session themes, generate exactly 3 alternative framings of the presenting issue — one from a CBT lens, one from an attachment lens, one from a somatic/body-based lens. Format as:\n\nCBT LENS: [one paragraph]\n\nATTACHMENT LENS: [one paragraph]\n\nSOMATIC LENS: [one paragraph]",
+        lastNotesContext, 600
+      ),
+      callClaude(
+        "You are a clinical records assistant. Write a brief, professional session memo suitable for clinical records. Use formal language. Anonymise — do not use the patient ID provided, use 'the client'. Keep it under 150 words. Include: date of note, session summary, clinical observations, plan. Format as plain paragraphs.",
+        lastNotesContext, 500
+      )
+    ]);
+
+    document.getElementById("bonus-progress").innerHTML = `<div class="prose"><p>${progressOut.replace(/\n/g,"</p><p>")}</p></div>`;
+    document.getElementById("bonus-reframe").innerHTML = formatReframe(reframeOut);
+    document.getElementById("bonus-memo").innerHTML = `<div class="memo-box">${memoOut}</div>`;
+
+    setPipelineStep("bonus","done");
+    setPipelineConnector(3,true);
+
+    // ── STEP 4: Judge (runs immediately, re-runs after devil) ─────────
+    setPipelineStep("judge","running");
     document.getElementById("section-judge").classList.remove("hidden");
-    await runJudge(lastAnalystOutput);
-    setStep('judge', 'done');
-    
-    document.getElementById("devil-btn").classList.remove("hidden");
-    saveHistory(notes);
+    document.getElementById("judge-body").innerHTML = skeletonHTML();
+    await runJudge(true);
+    setPipelineStep("judge","done");
 
-  } catch (e) {
-    showToast("Error occurred during analysis.");
+    // Show devil trigger
+    document.getElementById("section-devil-trigger").classList.remove("hidden");
+
+    // Save to history
+    saveToHistory(patientId, sessionN, notes, lastAnalystOutput);
+    setSessionStatus(`${patientId} · ${sessionN}`, false);
+    showToast("Analysis complete","success");
+
+  } catch(e) {
+    showToast("Error: " + e.message, "error");
+    setSessionStatus("Error — check settings", false, true);
     console.error(e);
-  } finally {
-    pipelineRunning = false;
-    document.getElementById("run-btn").disabled = false;
-    document.getElementById("session-status").textContent = "Idle";
   }
+
+  pipelineRunning = false;
+  document.getElementById("run-btn").disabled = false;
 }
 
-function renderAnalyst(text) {
-  // Logic to parse the structured text and convert to Apple UI components
-  let html = `<div class="prose">`;
-  const lines = text.split("\n");
-  lines.forEach(line => {
-    if(line.includes("Confidence:")) {
-      const conf = line.match(/HIGH|MEDIUM|LOW/)?.[0] || "MEDIUM";
-      const clean = line.replace(/Confidence:.*$/i, "").replace(/^\d+\.\s*/, "");
-      html += `<div class="rec-row">
-        <div class="rec-num">!</div>
-        <div style="flex:1">${clean.replace(/\[(\d+)\]/g, '<span class="cite">[$1]</span>')}</div>
-        <div class="conf-badge conf-${conf}">${conf}</div>
-      </div>`;
-    } else if(line.length > 5) {
-      html += `<p>${line}</p>`;
-    }
+// ─── Render analyst output ────────────────────────────────────────────
+function renderAnalyst(text){
+  // Parse sections
+  const sections = {
+    "PRESENTING THEMES": "",
+    "EVIDENCE SYNTHESIS": "",
+    "RECOMMENDATIONS": "",
+    "NEXT SESSION AGENDA": "",
+    "SUGGESTED ASSESSMENT TOOLS": ""
+  };
+  let current = "";
+  text.split("\n").forEach(line => {
+    const trimmed = line.trim();
+    if(sections.hasOwnProperty(trimmed)){ current = trimmed; return; }
+    if(current) sections[current] += line + "\n";
   });
-  html += `</div>`;
+
+  let html = "";
+
+  if(sections["PRESENTING THEMES"]){
+    html += `<div class="section-label">Presenting Themes</div><div class="prose"><p>${sections["PRESENTING THEMES"].trim().replace(/\n/g,"</p><p>")}</p></div>`;
+  }
+
+  if(sections["EVIDENCE SYNTHESIS"]){
+    html += `<div class="section-label" style="margin-top:18px">Evidence Synthesis</div><div class="prose"><p>${sections["EVIDENCE SYNTHESIS"].trim().replace(/\n/g,"</p><p>")}</p></div>`;
+  }
+
+  if(sections["RECOMMENDATIONS"]){
+    html += `<div class="section-label" style="margin-top:18px">Recommendations</div>`;
+    const recs = sections["RECOMMENDATIONS"].trim().split("\n").filter(l=>l.trim());
+    html += recs.map(rec => {
+      const confMatch = rec.match(/Confidence:\s*(HIGH|MEDIUM|LOW)/i);
+      const conf = confMatch?.[1]?.toUpperCase() || "MEDIUM";
+      const confClass = conf==="HIGH"?"conf-high":conf==="LOW"?"conf-low":"conf-med";
+      const clean = rec.replace(/^\d+\.\s*/,"").replace(/Confidence:\s*(HIGH|MEDIUM|LOW)/i,"").trim();
+      const num = rec.match(/^(\d+)\./)?.[1] || "·";
+      return `<div class="rec-row">
+        <div class="rec-num">${num}</div>
+        <div class="rec-text">${clean.replace(/\[(\d+)\]/g,'<span class="cite">[$1]</span>')}</div>
+        <div class="rec-confidence ${confClass}">${conf}</div>
+      </div>`;
+    }).join("");
+  }
+
+  if(sections["NEXT SESSION AGENDA"]){
+    html += `<div class="section-label" style="margin-top:18px">Next Session Agenda</div>
+      <div class="prose"><p>${sections["NEXT SESSION AGENDA"].trim().replace(/\n/g,"</p><p>")}</p></div>`;
+  }
+
+  if(sections["SUGGESTED ASSESSMENT TOOLS"]){
+    html += `<div class="section-label" style="margin-top:18px">Suggested Assessment Tools</div>
+      <div class="prose"><p>${sections["SUGGESTED ASSESSMENT TOOLS"].trim().replace(/\n/g,"</p><p>")}</p></div>`;
+  }
+
+  // If parsing failed, just show as prose
+  if(!html) html = `<div class="prose"><p>${text.replace(/\n/g,"</p><p>")}</p></div>`;
+
   document.getElementById("analyst-body").innerHTML = html;
 }
 
-async function runJudge(analystOut, devilOut = "") {
-  const prompt = `Arbitrate the plan. Provide: FOR/AGAINST TABLE, VERDICT, PROCEED? (PROCEED/CAUTION/REVISE).`;
-  const verdict = await callClaude(prompt, `ANALYST: ${analystOut}\nDEVIL: ${devilOut}`);
-  
-  let html = `<div class="prose"><p>${verdict.replace(/\n/g, '<br>')}</p></div>`;
-  // Simple table parsing simulation
-  if(verdict.includes("|")) {
-      html = `<table class="verdict-table"><thead><tr><th>Recommendation</th><th>Pros</th><th>Cons</th></tr></thead><tbody>`;
-      verdict.split("\n").filter(l => l.includes("|")).forEach(row => {
-          const cols = row.split("|").map(c => c.trim());
-          if(cols.length >= 3) html += `<tr><td>${cols[0]}</td><td class="for-cell">✓ ${cols[1]}</td><td class="against-cell">✗ ${cols[2]}</td></tr>`;
-      });
-      html += `</tbody></table>` + `<p>${verdict.split("VERDICT")[1] || ""}</p>`;
+// ─── Reframe formatter ────────────────────────────────────────────────
+function formatReframe(text){
+  return text
+    .replace(/CBT LENS:/g,`<div class="section-label" style="margin-top:12px">CBT Lens</div><div class="prose"><p>`)
+    .replace(/ATTACHMENT LENS:/g,`</p></div><div class="section-label" style="margin-top:12px">Attachment Lens</div><div class="prose"><p>`)
+    .replace(/SOMATIC LENS:/g,`</p></div><div class="section-label" style="margin-top:12px">Somatic Lens</div><div class="prose"><p>`)
+    + `</p></div>`;
+}
+
+// ─── Devil's Advocate ─────────────────────────────────────────────────
+async function runDevil(){
+  if(!lastAnalystOutput){ showToast("Run the main analysis first","error"); return; }
+  const btn = document.getElementById("devil-btn");
+  btn.classList.add("active");
+  btn.disabled = true;
+  btn.textContent = "😈 Challenging…";
+
+  document.getElementById("section-devil").classList.remove("hidden");
+  document.getElementById("devil-body").innerHTML = skeletonHTML();
+
+  try {
+    const devilPrompt = `You are a rigorous, adversarial clinical supervisor. Your ONLY job is to find weaknesses, blind spots, and risks in a proposed clinical plan. You are NOT trying to be balanced — you are trying to stress-test the thinking.
+
+For each major recommendation, ask: What could go wrong? What is the analyst assuming? What alternative explanation exists? What does the literature NOT support here? What patient factors might contradict this?
+
+OUTPUT FORMAT:
+CHALLENGED ASSUMPTIONS
+[list the key assumptions embedded in the plan and whether each holds]
+
+COUNTERARGUMENTS
+[for each major recommendation, a specific challenge]
+
+RISK FLAGS
+[specific risks of following this plan — patient safety, therapeutic rupture, misdiagnosis]
+
+WHAT IS MISSING
+[what has the analyst overlooked — differential diagnoses, cultural factors, other explanations]`;
+
+    const devilInput = `ORIGINAL SESSION NOTES:\n${lastNotesContext}\n\nCLINICAL ANALYST'S PLAN:\n${lastAnalystOutput}`;
+    const devilOut = await callClaude(devilPrompt, devilInput, 1200);
+    renderDevil(devilOut);
+    devilRan = true;
+
+    // Now re-run judge with devil's output
+    document.getElementById("re-judge-btn").classList.remove("hidden");
+    document.getElementById("judge-body").innerHTML = skeletonHTML();
+    await runJudge(false, devilOut);
+
+    btn.textContent = "😈 Challenge This Analysis";
+    btn.disabled = false;
+    showToast("Devil's Advocate complete — Judge updated","info");
+  } catch(e) {
+    showToast("Error: " + e.message,"error");
+    btn.classList.remove("active");
+    btn.disabled = false;
+    btn.textContent = "😈 Challenge This Analysis";
   }
+}
+
+function renderDevil(text){
+  const sections = ["CHALLENGED ASSUMPTIONS","COUNTERARGUMENTS","RISK FLAGS","WHAT IS MISSING"];
+  let html = "";
+  let current = "";
+  const collected = {};
+  sections.forEach(s=>{ collected[s]=""; });
+
+  text.split("\n").forEach(line => {
+    const trimmed = line.trim();
+    if(sections.includes(trimmed)){ current = trimmed; return; }
+    if(current) collected[current] += line + "\n";
+  });
+
+  sections.forEach(s => {
+    if(collected[s].trim()){
+      const label = s.charAt(0) + s.slice(1).toLowerCase().replace(/_/g," ");
+      html += `<div class="section-label" style="margin-top:${html?"18px":"0"}">${label}</div><div class="prose"><p>${collected[s].trim().replace(/\n/g,"</p><p>")}</p></div>`;
+    }
+  });
+
+  if(!html) html = `<div class="prose"><p>${text.replace(/\n/g,"</p><p>")}</p></div>`;
+  document.getElementById("devil-body").innerHTML = html;
+}
+
+// ─── Judge ────────────────────────────────────────────────────────────
+async function runJudge(firstRun=false, devilOutput=""){
+  const body = document.getElementById("judge-body");
+  if(!firstRun) body.innerHTML = skeletonHTML();
+
+  const judgePrompt = `You are an impartial, senior clinical supervisor. You have read a therapist's session notes, a clinical analyst's treatment plan${devilOutput ? ", and an adversarial critique of that plan" : ""}. Your job is to deliver a structured verdict.
+
+You are NOT the final decision-maker — the therapist is. Your job is to help them navigate the evidence clearly.
+
+OUTPUT FORMAT:
+
+FOR / AGAINST TABLE
+[Create a simple text table with 3 rows: one per major recommendation]
+Recommendation | Evidence For | Evidence Against | Weight
+
+VERDICT
+[2-3 sentences: what holds up, what needs caution, overall assessment]
+
+RECOMMENDED PATH
+[3-4 specific action items Sanby should take based on this arbitration]
+
+PROCEED?
+[ONE of: PROCEED / PROCEED WITH CAUTION / REVISE PLAN]`;
+
+  const judgeInput = `SESSION:\n${lastNotesContext}\n\nANALYST PLAN:\n${lastAnalystOutput}${devilOutput?`\n\nADVERSARIAL CRITIQUE:\n${devilOutput}`:""}`;
+
+  try {
+    const judgeOut = await callClaude(judgePrompt, judgeInput, 1200);
+    renderJudge(judgeOut);
+  } catch(e) {
+    body.innerHTML = `<div style="color:var(--danger);font-size:13px">Judge error: ${e.message}</div>`;
+  }
+}
+
+function renderJudge(text){
+  // Extract PROCEED? line
+  const proceedMatch = text.match(/PROCEED\?[\s\S]*?(PROCEED WITH CAUTION|PROCEED|REVISE PLAN)/i);
+  const proceedVerdict = proceedMatch?.[1]?.toUpperCase() || "";
+  const proceedClass = proceedVerdict==="PROCEED"?"proceed-yes":proceedVerdict.includes("CAUTION")?"proceed-caution":"proceed-revise";
+
+  let html = "";
+
+  // For/against table — render as styled rows
+  const tableMatch = text.match(/FOR \/ AGAINST TABLE([\s\S]*?)(?=VERDICT|$)/i);
+  if(tableMatch){
+    const tableText = tableMatch[1].trim();
+    const rows = tableText.split("\n").filter(l=>l.trim() && !l.toLowerCase().startsWith("recommend"));
+    if(rows.length){
+      html += `<div class="section-label">For / Against</div>
+        <table class="verdict-table">
+          <thead><tr><th>Recommendation</th><th>For</th><th>Against</th></tr></thead>
+          <tbody>`;
+      rows.forEach(row => {
+        const parts = row.split("|").map(s=>s.trim());
+        if(parts.length>=3){
+          html += `<tr>
+            <td>${parts[0]}</td>
+            <td class="for-cell"><span class="verdict-icon">✓</span>${parts[1]||"—"}</td>
+            <td class="against-cell"><span class="verdict-icon">✗</span>${parts[2]||"—"}</td>
+          </tr>`;
+        }
+      });
+      html += `</tbody></table>`;
+    }
+  }
+
+  // Verdict + Path
+  const verdictMatch = text.match(/VERDICT([\s\S]*?)(?=RECOMMENDED PATH|PROCEED|$)/i);
+  const pathMatch    = text.match(/RECOMMENDED PATH([\s\S]*?)(?=PROCEED|$)/i);
+
+  if(verdictMatch){
+    html += `<div class="section-label" style="margin-top:18px">Verdict</div>
+      <div class="prose"><p>${verdictMatch[1].trim().replace(/\n/g,"</p><p>")}</p></div>`;
+  }
+  if(pathMatch){
+    html += `<div class="section-label" style="margin-top:18px">Recommended Path</div>
+      <div class="prose"><p>${pathMatch[1].trim().replace(/\n/g,"</p><p>")}</p></div>`;
+  }
+
+  // Judge verdict box
+  if(proceedVerdict){
+    html += `<div class="judge-verdict">
+      <div class="judge-verdict-label">Judge's Decision</div>
+      <div class="judge-verdict-text">The weight of evidence ${proceedVerdict==="PROCEED"?"supports proceeding with the proposed treatment direction.":proceedVerdict.includes("CAUTION")?"supports the plan with important caveats — proceed carefully.":"suggests revising the plan before the next session."}</div>
+      <div class="judge-proceed ${proceedClass}">${proceedVerdict==="PROCEED"?"✓ Proceed":"⚠ "+proceedVerdict}</div>
+    </div>`;
+  }
+
+  if(!html) html = `<div class="prose"><p>${text.replace(/\n/g,"</p><p>")}</p></div>`;
   document.getElementById("judge-body").innerHTML = html;
 }
 
-async function runDevil() {
-    const btn = document.getElementById("devil-btn");
-    btn.disabled = true; btn.textContent = "😈 Challenging...";
-    document.getElementById("section-devil").classList.remove("hidden");
-    document.getElementById("devil-body").innerHTML = `<div class="skeleton"></div>`;
-    
-    try {
-        const devilOut = await callClaude("Be an adversarial supervisor. Find blind spots in the Analyst's plan.", lastAnalystOutput);
-        document.getElementById("devil-body").innerHTML = `<div class="prose"><p>${devilOut.replace(/\n/g, '<br>')}</p></div>`;
-        await runJudge(lastAnalystOutput, devilOut);
-        showToast("Devil's Advocate synthesized.");
-    } catch (e) { showToast("Devil error."); }
-    btn.textContent = "Challenge Analysis 😈"; btn.disabled = false;
+// ─── Session history ──────────────────────────────────────────────────
+function saveToHistory(patientId, sessionNum, notes, analystOut){
+  const entry = {
+    id: Date.now(),
+    date: new Date().toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"}),
+    patientId, sessionNum,
+    preview: notes.slice(0,100) + "…",
+    analystPreview: analystOut.slice(0,150) + "…"
+  };
+  sessionHistory.unshift(entry);
+  sessionHistory = sessionHistory.slice(0,20); // keep last 20
+  localStorage.setItem("sanby_history", JSON.stringify(sessionHistory));
+  renderHistory();
 }
 
-// ─── UTILS ───────────────────────────────────────────────────────────
-
-function setStep(id, status) {
-  const el = document.getElementById('pstep-'+id);
-  if(status === 'active') el.classList.add('active');
-  if(status === 'done') { el.classList.remove('active'); el.classList.add('done'); }
-}
-
-function showToast(msg) {
-  const container = document.getElementById("toast-container");
-  const t = document.createElement("div"); t.className = "toast"; t.textContent = msg;
-  container.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
-}
-
-function saveHistory(notes) {
-    const entry = {
-        id: Date.now(),
-        patient: document.getElementById("patient-id").value || "Anonymous",
-        session: document.getElementById("session-num").value || "N/A",
-        date: new Date().toLocaleDateString(),
-        notes: notes.slice(0, 100) + "..."
-    };
-    sessionHistory.unshift(entry);
-    localStorage.setItem("sanby_history", JSON.stringify(sessionHistory.slice(0,10)));
-}
-
-function renderHistory() {
-    const list = document.getElementById("history-list");
-    if(!sessionHistory.length) return list.innerHTML = `<p style="text-align:center; color:var(--sf-text-sec)">No sessions recorded yet.</p>`;
-    list.innerHTML = sessionHistory.map(h => `
-        <div class="glass-card" style="padding:20px; margin-bottom:12px">
-            <div style="display:flex; justify-content:space-between">
-                <span style="font-weight:700">${h.patient} · Session ${h.session}</span>
-                <span style="font-size:11px; color:var(--sf-text-sec)">${h.date}</span>
-            </div>
-            <p style="font-size:13px; margin-top:8px; color:var(--sf-text-sec)">${h.notes}</p>
+function renderHistory(){
+  const container = document.getElementById("history-list");
+  if(!sessionHistory.length){
+    container.innerHTML = `<div class="input-card"><div class="input-card-body" style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:12px;opacity:.4">📚</div><div style="font-size:14px">No sessions yet.</div></div></div>`;
+    return;
+  }
+  container.innerHTML = sessionHistory.map(s => `
+    <div class="input-card" style="margin-bottom:12px">
+      <div class="input-card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px">
+          <div>
+            <div style="font-weight:700;font-size:14px;color:var(--slate)">${s.patientId} · ${s.sessionNum}</div>
+            <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace">${s.date}</div>
+          </div>
         </div>
-    `).join("");
+        <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:6px"><em>Notes:</em> ${s.preview}</div>
+        <div style="font-size:12px;color:var(--slate3);line-height:1.6"><em>Analysis:</em> ${s.analystPreview}</div>
+      </div>
+    </div>`).join("");
 }
 
-(function boot() {
-  updateApiUI();
-  if(API_KEY) document.getElementById("api-key-input").value = API_KEY;
-})();
+// ─── Toast ────────────────────────────────────────────────────────────
+function showToast(msg, type="info"){
+  const tc = document.getElementById("toasts");
+  const t = document.createElement("div");
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  tc.appendChild(t);
+  setTimeout(()=>{ t.style.opacity="0"; t.style.transition="opacity .3s"; setTimeout(()=>t.remove(),350); },3000);
+}
+
+// ─── Keyboard ─────────────────────────────────────────────────────────
+document.addEventListener("keydown", e => {
+  if(e.ctrlKey && e.key==="Enter") runPipeline();
+});
 </script>
 </body>
 </html>
